@@ -1,0 +1,66 @@
+<mujoco model="stretch demo: self-feeding">
+  <!-- Self-feeding: the robot holds a spoon (scenes/utensil.xml, mounted in the
+       gripper), scoops from the plate, and brings the bite to the seated person's
+       mouth (the green box). tasks/feeding.py scores each bite.
+
+       Stretch 4: the arm reaches along +x (toward the person), strafing moves
+       along +y. Angles in radians: stretch.xml sets compiler angle="radian". -->
+  <include file="stretch.xml"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <asset>
+    <texture file="robosuite_assets/textures/light-wood.png" type="cube" name="wood"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.44 0.80 1.00" rgb2="1 1 1" width="512" height="3072"/>
+    <material name="floor_mat" rgba=".12 .12 .12 1" reflectance="0.08"/>
+    <material name="table_mat" texture="wood" rgba=".9 .8 .7 1"/>
+    <material name="plate_mat" rgba=".96 .96 .93 1" specular=".5"/>
+    <material name="skin_mat" rgba=".87 .70 .58 1"/>
+    <material name="shirt_mat" rgba=".25 .40 .62 1"/>
+    <material name="chair_mat" rgba=".2 .2 .22 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.6 0 2.4" dir="0 0 -1" directional="true"/>
+    <!-- The Stretch 4 omniwheel contact pairs reference this geom by name. -->
+    <geom name="floor" type="plane" size="0 0 0.05" material="floor_mat"/>
+
+    <body name="table" pos="0.732 -0.066 0" quat="0.707107 0 0 0.707107">
+      <geom name="table_top" type="box" size=".40 .24 .02" pos="0 0 .72" material="table_mat"/>
+      <geom type="cylinder" size=".02 .35" pos=" .36  .20 .35" material="table_mat"/>
+      <geom type="cylinder" size=".02 .35" pos="-.36  .20 .35" material="table_mat"/>
+      <geom type="cylinder" size=".02 .35" pos=" .36 -.20 .35" material="table_mat"/>
+      <geom type="cylinder" size=".02 .35" pos="-.36 -.20 .35" material="table_mat"/>
+    </body>
+
+    <body name="plate" pos="0.692 -0.106 0.746" quat="0.707107 0 0 0.707107">
+      <geom name="plate" type="cylinder" size=".10 .006" material="plate_mat"/>
+      <geom type="sphere" size=".016" pos=" .02  .01 .012" rgba=".85 .55 .2 1" contype="0" conaffinity="0"/>
+      <geom type="sphere" size=".014" pos="-.025 .02 .010" rgba=".85 .55 .2 1" contype="0" conaffinity="0"/>
+      <geom type="sphere" size=".015" pos=" .00 -.03 .011" rgba=".40 .62 .25 1" contype="0" conaffinity="0"/>
+      <!-- Where the spoon tip has to go to pick up a bite. -->
+      <site name="plate_zone" type="cylinder" size=".09 .035" pos="0 0 .035" rgba="1 .8 .2 .12"/>
+    </body>
+
+    <!-- Seated person facing the robot across the table; mouth reachable with the
+         arm at ~0.35 and the lift near the top of its travel. -->
+    <body name="person" pos="1.152 -0.006 0" quat="0.707107 0 0 0.707107">
+      <geom name="chair_seat" type="box" size=".22 .22 .03" pos="0 -.02 .45" material="chair_mat"/>
+      <geom name="chair_back" type="box" size=".22 .03 .30" pos="0 -.22 .78" material="chair_mat"/>
+      <geom name="torso" type="capsule" fromto="0 -.02 .52  0 0 .90" size=".14" material="shirt_mat"/>
+      <geom name="shoulders" type="capsule" fromto="-.17 0 .92  .17 0 .92" size=".055" material="shirt_mat"/>
+      <geom name="neck" type="capsule" fromto="0 .02 .95  0 .05 1.03" size=".045" material="skin_mat"/>
+      <geom name="head" type="sphere" size=".095" pos="0 .08 1.12" material="skin_mat"/>
+      <geom name="lips" type="box" size=".022 .006 .006" pos="0 .172 1.085" rgba=".7 .25 .25 1" contype="0" conaffinity="0"/>
+      <geom type="sphere" size=".012" pos="-.035 .16 1.14" rgba=".1 .1 .1 1" contype="0" conaffinity="0"/>
+      <geom type="sphere" size=".012" pos=" .035 .16 1.14" rgba=".1 .1 .1 1" contype="0" conaffinity="0"/>
+      <!-- Target: the spoon tip inside this box is a delivered bite. -->
+      <site name="mouth_box" type="box" size=".035 .03 .022" pos="0 .19 1.085" rgba=".2 .9 .3 .35"/>
+      <!-- The face: the tip in here but not in mouth_box is a miss. -->
+      <site name="face_zone" type="sphere" size=".10" pos="0 .08 1.12" rgba="1 0 0 0"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,52 @@
+<mujoco model="stretch demo: floor pickup">
+  <!-- Floor pickup: a dropped bottle on the floor in front of the robot; pick it
+       up, strafe over to the side table (to the robot's left) and set it down in
+       the green zone. tasks/pickup.py scores it.
+       Stretch 4: the arm reaches along +x, strafing moves along +y. Radians
+       (compiler angle="radian" from stretch.xml). -->
+  <include file="stretch.xml"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <asset>
+    <texture file="robosuite_assets/textures/dark-wood.png" type="cube" name="wood"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.44 0.80 1.00" rgb2="1 1 1" width="512" height="3072"/>
+    <material name="floor_mat" rgba=".30 .28 .26 1" reflectance="0.05"/>
+    <material name="table_mat" texture="wood" rgba="1 1 1 1"/>
+    <material name="bottle_mat" rgba=".15 .45 .85 1" specular=".6" shininess=".5"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.6 0 2.4" dir="0 0 -1" directional="true"/>
+    <!-- The omniwheel contact pairs in stretch.xml reference this geom by name. -->
+    <geom name="floor" type="plane" size="0 0 0.05" material="floor_mat"/>
+
+    <!-- The bottle, standing where it was dropped. 24 cm tall: with a level wrist
+         at the bottom of the lift the gripper reaches its upper part; pitching
+         the wrist down reaches lower. -->
+    <body name="bottle" pos="0.672 -0.066 0.121">
+      <freejoint name="bottle_free"/>
+      <!-- Contact settings from mujoco-sim's scenes/bottle.xml (stiff contact,
+           torsional friction 0.3) so a two-point pinch doesn't let it pivot out. -->
+      <geom name="bottle" type="cylinder" size=".033 .12" material="bottle_mat" mass=".2"
+            friction="1.0 0.3 0.1" condim="4" solimp="0.998 0.998 0.001" solref="0.001 1"/>
+      <geom name="bottle_cap" type="cylinder" size=".015 .012" pos="0 0 .13" rgba=".95 .95 .95 1"
+            mass=".01" friction="1.0 0.3 0.1" condim="4" solimp="0.998 0.998 0.001" solref="0.001 1"/>
+      <site name="bottle_center" pos="0 0 0" size=".01" rgba="0 0 0 0"/>
+    </body>
+
+    <body name="side_table" pos="0.672 0.354 0" quat="0.707107 0 0 0.707107">
+      <geom name="side_table_top" type="box" size=".15 .20 .02" pos="0 0 .43" material="table_mat"/>
+      <geom type="cylinder" size=".018 .21" pos=" .12  .17 .21" material="table_mat"/>
+      <geom type="cylinder" size=".018 .21" pos="-.12  .17 .21" material="table_mat"/>
+      <geom type="cylinder" size=".018 .21" pos=" .12 -.17 .21" material="table_mat"/>
+      <geom type="cylinder" size=".018 .21" pos="-.12 -.17 .21" material="table_mat"/>
+      <geom type="cylinder" size=".09 .002" pos="0 0 .451" rgba=".2 .8 .35 .6" contype="0" conaffinity="0"/>
+      <!-- Placed = the bottle's center comes to rest in here. -->
+      <site name="place_zone" type="box" size=".13 .18 .07" pos="0 0 .52" rgba=".2 .9 .3 .08"/>
+    </body>
+  </worldbody>
+</mujoco>

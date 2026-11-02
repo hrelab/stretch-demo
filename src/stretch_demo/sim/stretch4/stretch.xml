@@ -1,0 +1,1526 @@
+<mujoco model="stretch_4">
+  <compiler angle="radian" assetdir="assets" />
+  <option impratio="20" integrator="implicitfast" cone="elliptic" noslip_iterations="5" />
+  <size njmax="5000" nconmax="5000" nkey="722" />
+  <default>
+    <default class="stretch">
+      <geom solref="0.005" />
+      <general biastype="affine" />
+      <default class="wheel">
+        <joint armature="0.01" damping="0.1" limited="false" />
+        <general forcerange="-25 25" gear="6" gainprm="500" biasprm="0 -500 -1" />
+      </default>
+      <default class="lift">
+        <joint stiffness="0.03" armature="0.01" damping="50" frictionloss="1.5" />
+        <general forcerange="-200 200" gainprm="500" biasprm="0 -1000 -100" />
+        <default class="lift_stretch4" />
+      </default>
+      <default class="telescope">
+        <joint stiffness="0.02" armature="0.01" damping="50" frictionloss="1.5" />
+        <general forcerange="-150 150" gainprm="500" biasprm="0 -1000 -100" />
+      </default>
+      <default class="head">
+        <joint damping="1" />
+        <general gainprm="10" biasprm="0 -10" />
+        <default class="head_pan">
+          <joint range="-4.04 1.73" />
+          <general ctrlrange="-4.04 1.73" />
+        </default>
+        <default class="head_tilt">
+          <joint range="-1.53 0.79" />
+          <general ctrlrange="-1.53 0.79" />
+        </default>
+      </default>
+      <default class="wrist">
+        <joint damping="1" />
+        <general gainprm="10" biasprm="0 -10" />
+        <default class="wrist_yaw">
+          <joint armature="0.01" damping="2" frictionloss="0.1" />
+          <general gainprm="20" biasprm="0 -20" />
+          <default class="wrist_yaw_stretch4" />
+        </default>
+        <default class="wrist_pitch">
+          <joint armature="0.01" damping="2" frictionloss="0.1" />
+          <general gainprm="20" biasprm="0 -20" />
+          <default class="wrist_pitch_stretch4" />
+        </default>
+        <default class="wrist_roll">
+          <joint armature="0.01" damping="2" frictionloss="0.1" />
+          <general gainprm="20" biasprm="0 -20" />
+          <default class="wrist_roll_stretch4" />
+        </default>
+        <default class="finger_open">
+          <default class="gripper_right_finger">
+            <joint range="0 0.5" armature="0.1" damping="10" frictionloss="0.1" axis="0 1 0" />
+            <general ctrlrange="0 0.5" forcerange="-30 30" gainprm="500" biasprm="0 -500 -20" />
+          </default>
+          <default class="gripper_left_finger">
+            <joint range="0 0.5" armature="0.1" damping="10" frictionloss="0.1" axis="0 -1 0" />
+            <general ctrlrange="0 0.5" forcerange="-30 30" gainprm="500" biasprm="0 -500 -20" />
+          </default>
+        </default>
+      </default>
+      <default class="visualgeom">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom type="mesh" group="3" />
+        <default class="rubber">
+          <geom condim="6" priority="1" friction="2 0.5 0.5" solref="0.02" solimp="0.99 0.99 0.01" />
+        </default>
+        <default class="omniwheel_collision">
+          <geom size="0.1 0.01 0" type="capsule" contype="6" conaffinity="4" friction="0.8 0.05 0.001" />
+        </default>
+      </default>
+    </default>
+  </default>
+  <asset>
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <material name="collision_material" rgba="1 0.28 0.1 0.9" />
+    <mesh name="base_collision_link" file="base_collision_link.STL" />
+    <mesh name="base_link" file="base_link.STL" />
+    <mesh name="head_collision_link" file="head_collision_link.STL" />
+    <mesh name="head_link" file="head_link.STL" />
+    <mesh name="mast_collision_link" file="mast_collision_link.STL" />
+    <mesh name="mast_link" file="mast_link.STL" />
+    <mesh name="lift_collision_link" file="lift_collision_link.STL" />
+    <mesh name="lift_link" file="lift_link.STL" />
+    <mesh name="arm_l0_collision_link" file="arm_l0_collision_link.STL" />
+    <mesh name="arm_l0_link" file="arm_l0_link.STL" />
+    <mesh name="arm_l1_collision_link" file="arm_l1_collision_link.STL" />
+    <mesh name="arm_l1_link" file="arm_l1_link.STL" />
+    <mesh name="arm_l2_collision_link" file="arm_l2_collision_link.STL" />
+    <mesh name="arm_l2_link" file="arm_l2_link.STL" />
+    <mesh name="arm_l3_collision_link" file="arm_l3_collision_link.STL" />
+    <mesh name="arm_l3_link" file="arm_l3_link.STL" />
+    <mesh name="arm_l4_collision_link" file="arm_l4_collision_link.STL" />
+    <mesh name="arm_l4_link" file="arm_l4_link.STL" />
+    <mesh name="wrist_collision_link" file="wrist_collision_link.STL" />
+    <mesh name="wrist_link" file="wrist_link.STL" />
+    <mesh name="wrist_yaw_collision_link" file="wrist_yaw_collision_link.STL" />
+    <mesh name="wrist_yaw_link" file="wrist_yaw_link.STL" />
+    <mesh name="wrist_pitch_collision_link" file="wrist_pitch_collision_link.STL" />
+    <mesh name="wrist_pitch_link" file="wrist_pitch_link.STL" />
+    <mesh name="wrist_roll_collision_link" file="wrist_roll_collision_link.STL" />
+    <mesh name="wrist_roll_link" file="wrist_roll_link.STL" />
+    <mesh name="gripper_camera_collision_link" file="gripper_camera_collision_link.STL" />
+    <mesh name="gripper_camera_link" file="gripper_camera_link.STL" />
+    <mesh name="tool_attachment_site_collision_link" file="tool_attachment_site_collision_link.STL" />
+    <mesh name="tool_attachment_site_link" file="tool_attachment_site_link.STL" />
+    <mesh name="quick_connect_interface_collision_link" file="quick_connect_interface_collision_link.STL" />
+    <mesh name="quick_connect_interface_link" file="quick_connect_interface_link.STL" />
+    <mesh name="gripper_finger_right_collision_link" file="gripper_finger_right_collision_link.STL" />
+    <mesh name="gripper_finger_right_link" file="gripper_finger_right_link.STL" />
+    <mesh name="gripper_fingertip_right_collision_link" file="gripper_fingertip_right_collision_link.STL" />
+    <mesh name="gripper_fingertip_right_link" file="gripper_fingertip_right_link.STL" />
+    <mesh name="aruco_fingertip_right_collision_link" file="aruco_fingertip_right_collision_link.STL" />
+    <mesh name="aruco_fingertip_right_link" file="aruco_fingertip_right_link.STL" />
+    <mesh name="gripper_finger_left_collision_link" file="gripper_finger_left_collision_link.STL" />
+    <mesh name="gripper_finger_left_link" file="gripper_finger_left_link.STL" />
+    <mesh name="gripper_fingertip_left_collision_link" file="gripper_fingertip_left_collision_link.STL" />
+    <mesh name="gripper_fingertip_left_link" file="gripper_fingertip_left_link.STL" />
+    <mesh name="aruco_fingertip_left_collision_link" file="aruco_fingertip_left_collision_link.STL" />
+    <mesh name="aruco_fingertip_left_link" file="aruco_fingertip_left_link.STL" />
+    <mesh name="wrist_aruco_collision_link" file="wrist_aruco_collision_link.STL" />
+    <mesh name="wrist_aruco_link" file="wrist_aruco_link.STL" />
+    <mesh name="wrist_reflector_collision_link" file="wrist_reflector_collision_link.STL" />
+    <mesh name="wrist_reflector_link" file="wrist_reflector_link.STL" />
+    <mesh name="wheel_2_collision_link" file="wheel_2_collision_link.STL" />
+    <mesh name="wheel_2_link" file="wheel_2_link.STL" />
+    <mesh name="wheel_1_collision_link" file="wheel_1_collision_link.STL" />
+    <mesh name="wheel_1_link" file="wheel_1_link.STL" />
+    <mesh name="wheel_0_collision_link" file="wheel_0_collision_link.STL" />
+    <mesh name="wheel_0_link" file="wheel_0_link.STL" />
+    <mesh name="docking_contact_link" file="docking_contact_link.STL" />
+  </asset>
+  <worldbody>
+    <body name="stretch4" pos="0 0 0.0565">
+      <joint name="floating_base" type="free" />
+      <geom name="base_footprint_visual" class="visualgeom" size="0.0005 0.0005 0.0005" type="box" group="1" mass="0" />
+      <site name="base_footprint_site" />
+      <site name="imu" size="0.01" />
+      <body name="base_link" pos="0 0 0.028">
+        <inertial pos="0.000438849 -0.00177715 0.0964684" mass="18.9261" diaginertia="0.214993 0.22301 0.327846" />
+        <geom name="base_link_collision" class="collision" mass="0" mesh="base_collision_link" />
+        <geom name="base_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="base_link" />
+        <body name="line_sensor_5_link" pos="0.0613832 0.178319 0.0527014" quat="0.843829 -0.112476 0.194813 0.487185">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_5_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="line_sensor_4_link" pos="-0.0613832 0.178319 0.0527014" quat="0.487185 -0.194813 0.112476 0.843829">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_4_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="line_sensor_3_link" pos="-0.18512 -0.036 0.0527014" quat="0 0.224951 0 -0.97437">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_3_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="line_sensor_2_link" pos="-0.123737 -0.142319 0.0527014" quat="0.487185 0.194813 0.112476 -0.843829">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_2_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="line_sensor_1_link" pos="0.123737 -0.142319 0.0527014" quat="0.843829 0.112476 0.194813 -0.487185">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_1_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="line_sensor_0_link" pos="0.18512 -0.036 0.0527014" quat="0.97437 0 0.224951 0">
+          <inertial pos="0.00114502 -0.000126775 0.0119762" mass="0.00213836" diaginertia="2.88698e-07 2.34959e-07 6.64616e-08" />
+          <body name="line_sensor_0_optical_link" pos="0.00286 0 0" quat="0.5 -0.5 0.5 -0.5" />
+        </body>
+        <body name="head_link" pos="-0.093 -0.098 1.559">
+          <inertial pos="0.0578831 0.098591 -0.0270263" mass="5.61844" diaginertia="0.0382732 0.0306327 0.0640021" />
+          <geom name="head_link_collision" class="collision" mass="0" mesh="head_collision_link" />
+          <geom name="head_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="head_link" />
+          <camera name="cam_hemilidar_left" quat="0.853553 0.176704 -0.339444 0.353553" pos="0.131744 0.222414 -0.058328" />
+          <camera name="cam_hemilidar_right" quat="0.353553 -0.339444 0.176704 0.853553" pos="0.131744 -0.0264137 -0.058328" />
+          <body name="lidar_right_link" pos="0.131744 -0.0264137 -0.058328" quat="-0.339444 -0.353553 -0.853553 0.176704">
+            <inertial pos="0.0766909 0.0306841 -0.123358" mass="5.62563" diaginertia="0.049283 0.0349357 0.0486907" />
+          </body>
+          <body name="lidar_left_link" pos="0.131744 0.222414 -0.058328" quat="0.176704 -0.853553 -0.353553 -0.339444">
+            <inertial pos="-0.0761201 0.0298724 -0.122719" mass="5.62563" diaginertia="0.0495632 0.034542 0.0488042" />
+          </body>
+          <body name="camera_right_link" pos="0.171841 0.023 -0.0157567" quat="0.648459 0.648459 0.281958 -0.281958">
+            <inertial pos="-0.0693851 -0.0909127 -0.0755903" mass="5.62563" diaginertia="0.0518046 0.0504718 0.030633" />
+            <body name="camera_right_optical_link" pos="0.0212 0 0" quat="0.5 -0.5 0.5 -0.5">
+              <camera name="camera_right_link" quat="0 1 0 0" />
+            </body>
+          </body>
+          <body name="camera_left_link" pos="0.171841 0.173 -0.0157567" quat="0.648459 -0.648459 0.281958 0.281958">
+            <inertial pos="-0.0693851 0.0909127 -0.0744097" mass="5.62563" diaginertia="0.0518046 0.0504718 0.030633" />
+            <body name="camera_left_optical_link" pos="0.0212 0 0" quat="0.5 -0.5 0.5 -0.5">
+              <camera name="camera_left_link" quat="0 1 0 0" />
+            </body>
+          </body>
+          <body name="camera_center_link" pos="0.177246 0.098 -0.0239069" quat="0.67438 0.67438 0.212631 -0.212631">
+            <inertial pos="-0.0958729 0.070924 0.000590251" mass="5.62563" diaginertia="0.0465207 0.0557556 0.030633" />
+            <body name="camera_center_optical_link" pos="0.0017 0 0" quat="0.5 -0.5 0.5 -0.5">
+              <camera name="camera_center_link" quat="0 1 0 0" />
+            </body>
+          </body>
+        </body>
+        <body name="mast_link" pos="-0.093 -0.098 0.004">
+          <inertial pos="0 -0.00165283 0.815" mass="10.8925" diaginertia="1.96276 1.96594 0.00577662" />
+          <geom class="visualgeom" mass="0" mesh="mast_link" />
+          <geom class="collision" mass="0" mesh="mast_collision_link" />
+          <body name="lift_link" pos="0 -0.0014 0.241" gravcomp="1">
+            <inertial pos="-0.0233092 0.0564207 0.00671885" mass="2.73452" diaginertia="0.0114664 0.00956614 0.0132436" />
+            <joint name="lift_joint" class="lift_stretch4" type="slide" range="0 1.2" />
+            <geom name="lift_link_collision" class="collision" mass="0" mesh="lift_collision_link" />
+            <geom name="lift_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="lift_link" />
+            <body name="arm_l0_link" pos="0.01675 0.0994 -0.0128595">
+              <inertial pos="0.0737362 0 0.00216424" mass="0.218977" diaginertia="0.000273561 0.00070876 0.000740563" />
+              <geom name="arm_l0_link_collision" class="collision" mass="0" mesh="arm_l0_collision_link" />
+              <geom name="arm_l0_link_visual" class="visualgeom" group="1" mass="0" mesh="arm_l0_link" />
+              <body name="arm_l1_link" pos="-0.01375 0 0">
+                <inertial pos="0.0983194 0 0.00214616" mass="0.211729" diaginertia="0.000227675 0.000730799 0.000759408" />
+                <joint name="arm_l1_joint" class="telescope" type="slide" range="0 0.13" axis="1 0 0" />
+                <geom name="arm_l1_link_collision" class="collision" mass="0" mesh="arm_l1_collision_link" />
+                <geom name="arm_l1_link_visual" class="visualgeom" group="1" mass="0" mesh="arm_l1_link" />
+                <body name="arm_l2_link" pos="-0.0135 0 0">
+                  <inertial pos="0.126545 0 0.00212533" mass="0.197181" diaginertia="0.000180704 0.000676905 0.000701572" />
+                  <joint name="arm_l2_joint" class="telescope" type="slide" range="0 0.13" axis="1 0 0" />
+                  <geom name="arm_l2_link_collision" class="collision" mass="0" mesh="arm_l2_collision_link" />
+                  <geom name="arm_l2_link_visual" class="visualgeom" group="1" mass="0" mesh="arm_l2_link" />
+                  <body name="arm_l3_link" pos="-0.0135 0 0">
+                    <inertial pos="0.154806 0 0.00210076" mass="0.18238" diaginertia="0.000140464 0.000623711 0.000644687" />
+                    <joint name="arm_l3_joint" class="telescope" type="slide" range="0 0.13" axis="1 0 0" />
+                    <geom name="arm_l3_link_collision" class="collision" mass="0" mesh="arm_l3_collision_link" />
+                    <geom name="arm_l3_link_visual" class="visualgeom" group="1" mass="0" mesh="arm_l3_link" />
+                    <body name="arm_l4_link" pos="-0.0055 0 0">
+                      <inertial pos="0.15125 0 0.00206007" mass="0.131482" diaginertia="7.61244e-05 0.000514641 0.000527876" />
+                      <joint name="arm_l4_joint" class="telescope" type="slide" range="0 0.13" axis="1 0 0" />
+                      <geom name="arm_l4_link_collision" class="collision" mass="0" mesh="arm_l4_collision_link" />
+                      <geom name="arm_l4_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="arm_l4_link" />
+                      <body name="wrist_link" pos="0.2934 0 -0.03672" gravcomp="1">
+                        <inertial pos="-0.00943224 -2.24073e-08 0.035067" mass="0.228849" diaginertia="0.00012247 0.000171521 0.000141511" />
+                        <geom name="wrist_link_collision" class="collision" mass="0" mesh="wrist_collision_link" />
+                        <geom name="wrist_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="wrist_link" />
+                        <body name="wrist_yaw_link">
+                          <inertial pos="-8.08039e-08 -0.00772612 -0.0363543" mass="0.217322" diaginertia="0.000154148 0.000122233 0.000116712" />
+                          <joint name="wrist_yaw_joint" class="wrist_yaw_stretch4" range="-1.135 4.276" />
+                          <geom name="wrist_yaw_link_collision" class="collision" mass="0" mesh="wrist_yaw_collision_link" />
+                          <geom name="wrist_yaw_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="wrist_yaw_link" />
+                          <body name="wrist_pitch_link" pos="0 -0.04222 -0.0452">
+                            <inertial pos="0.00772612 -0.0363543 8.08039e-08" mass="0.217322" diaginertia="0.000122233 0.000116712 0.000154148" />
+                            <joint name="wrist_pitch_joint" class="wrist_pitch_stretch4" range="-1.135 4.276" axis="0 1 0" />
+                            <geom name="wrist_pitch_link_collision" class="collision" mass="0" mesh="wrist_pitch_collision_link" />
+                            <geom name="wrist_pitch_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="wrist_pitch_link" />
+                            <body name="wrist_roll_link" pos="0.04222 -0.0452 0">
+                              <inertial pos="0.0125796 0.0013906 0.0122312" mass="0.0875519" diaginertia="7.36573e-05 5.31097e-05 2.50173e-05" />
+                              <joint name="wrist_roll_joint" class="wrist_roll_stretch4" range="-4.276 1.135" axis="1 0 0" />
+                              <geom name="wrist_roll_link_collision" class="collision" mass="0" mesh="wrist_roll_collision_link" />
+                              <geom name="wrist_roll_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="wrist_roll_link" />
+                              <body name="gripper_camera_link" pos="0.0192 0 0.057" quat="0.999657 0 0.0261769 0" gravcomp="1">
+                                <inertial pos="-0.0121348 0 0.00187096" mass="0.044776" diaginertia="1.60194e-05 6.92268e-06 1.36285e-05" />
+                                <geom name="gripper_camera_link_collision" class="collision" mass="0" mesh="gripper_camera_collision_link" />
+                                <geom name="gripper_camera_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="gripper_camera_link" />
+                                <camera name="gripper_camera_left_rgb" quat="-0.48674 -0.512917 0.512917 0.48674" pos="0 0.01 0" />
+                                <camera name="gripper_camera_right_rgb" quat="-0.48674 -0.512917 0.512917 0.48674" pos="0 -0.01 0" />
+                                <camera name="gripper_camera_stereo_depth" quat="-0.48674 -0.512917 0.512917 0.48674" />
+                                <body name="gripper_stereo_camera_color_optical_frame" quat="0.512917 -0.48674 0.48674 -0.512917" gravcomp="1">
+                                  <geom name="gripper_stereo_camera_color_optical_frame_visual" class="visualgeom" size="0.0005 0.0005 0.0005" type="box" group="1" mass="0" />
+                                </body>
+                                <body name="gripper_right_camera_color_optical_frame" pos="0 -0.01 0" quat="0.512917 -0.48674 0.48674 -0.512917" gravcomp="1">
+                                  <geom name="gripper_right_camera_color_optical_frame_visual" class="visualgeom" size="0.0005 0.0005 0.0005" type="box" group="1" mass="0" />
+                                </body>
+                                <body name="gripper_left_camera_color_optical_frame" pos="0 0.01 0" quat="0.512917 -0.48674 0.48674 -0.512917" gravcomp="1">
+                                  <geom name="gripper_left_camera_color_optical_frame_visual" class="visualgeom" size="0.0005 0.0005 0.0005" type="box" group="1" mass="0" />
+                                </body>
+                              </body>
+                              <body name="tool_attachment_site_link" pos="0.0186 0 0">
+                                <inertial pos="-0.00602038 0.0013906 0.0122312" mass="0.0875519" diaginertia="7.36573e-05 5.31097e-05 2.50173e-05" />
+                                <geom name="tool_attachment_site_link_collision" class="collision" mass="0" mesh="tool_attachment_site_collision_link" />
+                                <geom name="tool_attachment_site_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="tool_attachment_site_link" />
+                                <body name="quick_connect_interface_link">
+                                  <inertial pos="0.0460467 5.63315e-06 -0.00837501" mass="0.268267" diaginertia="0.000142502 0.000269734 0.000235103" />
+                                  <geom name="quick_connect_interface_link_collision" class="collision" mass="0" mesh="quick_connect_interface_collision_link" />
+                                  <geom name="quick_connect_interface_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="quick_connect_interface_link" />
+                                  <body name="grasp_center_link" pos="0.234962 0 0" />
+                                  <body name="gripper_slider_link" gravcomp="1">
+                                    <geom class="visualgeom" size="0.03 0.005 0.005" type="box" rgba="0 0 0 0" mass="0.05" />
+                                    <body name="gripper_finger_right_link" pos="0.0377995 -0.0221214 0" quat="0 1 0 0" gravcomp="1">
+                                      <inertial pos="0.102875 -0.0197364 3.17209e-06" mass="0.0196452" diaginertia="7.66307e-06 5.78136e-05 6.49201e-05" />
+                                      <joint name="gripper_finger_right_joint" class="gripper_right_finger" axis="0 0 1" />
+                                      <geom name="gripper_finger_right_link_collision" class="rubber" mass="0" mesh="gripper_finger_right_collision_link" />
+                                      <geom name="gripper_finger_right_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="gripper_finger_right_link" />
+                                      <body name="gripper_fingertip_right_link" pos="0.191008 -0.022168 0" quat="0 0.798636 -0.601815 0" gravcomp="1">
+                                        <inertial pos="0.000475559 0.00831957 -0.000277041" mass="0.0155505" diaginertia="2.74951e-06 1.01135e-06 2.15901e-06" />
+                                        <joint name="gripper_fingertip_right_link_compliant_x" stiffness="0.1" range="-0.15 0.15" damping="0.002" axis="1 0 0" limited="true" />
+                                        <joint name="gripper_fingertip_right_link_compliant_y" stiffness="0.1" range="-0.15 0.15" damping="0.002" axis="0 1 0" limited="true" />
+                                        <geom name="gripper_fingertip_right_link_collision" class="rubber" mass="0" mesh="gripper_fingertip_right_collision_link" />
+                                        <geom name="gripper_fingertip_right_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="gripper_fingertip_right_link" />
+                                        <body name="aruco_fingertip_right_link" pos="-0.00441711 0.0320457 0" quat="0.263911 0.217552 0.597718 0.72509">
+                                          <inertial pos="-3.3044e-06 -9.90744e-06 -0.000211788" mass="0.000123521" diaginertia="3.33209e-09 3.32884e-09 6.65796e-09" />
+                                          <geom name="aruco_fingertip_right_link_collision" class="collision" mass="0" mesh="aruco_fingertip_right_collision_link" />
+                                          <geom name="aruco_fingertip_right_link_visual" class="visualgeom" group="1" rgba="1 1 1 1" mass="0" mesh="aruco_fingertip_right_link" />
+                                        </body>
+                                      </body>
+                                    </body>
+                                    <body name="gripper_finger_left_link" pos="0.0378 0.022121 0" gravcomp="1">
+                                      <inertial pos="0.102874 -0.0197364 3.17208e-06" mass="0.0196452" diaginertia="7.66298e-06 5.78118e-05 6.49182e-05" />
+                                      <joint name="gripper_finger_left_joint" class="gripper_left_finger" axis="0 0 1" />
+                                      <geom name="gripper_finger_left_link_collision" class="rubber" mass="0" mesh="gripper_finger_left_collision_link" />
+                                      <geom name="gripper_finger_left_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="gripper_finger_left_link" />
+                                      <body name="gripper_fingertip_left_link" pos="0.191008 -0.022168 0" quat="0.798636 0 0 -0.601815" gravcomp="1">
+                                        <inertial pos="0.000475578 -0.00831953 -0.000277172" mass="0.0155505" diaginertia="2.74951e-06 1.01134e-06 2.15901e-06" />
+                                        <joint name="gripper_fingertip_left_link_compliant_x" stiffness="0.1" range="-0.15 0.15" damping="0.002" axis="1 0 0" limited="true" />
+                                        <joint name="gripper_fingertip_left_link_compliant_y" stiffness="0.1" range="-0.15 0.15" damping="0.002" axis="0 1 0" limited="true" />
+                                        <geom name="gripper_fingertip_left_link_collision" class="rubber" mass="0" mesh="gripper_fingertip_left_collision_link" />
+                                        <geom name="gripper_fingertip_left_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="gripper_fingertip_left_link" />
+                                        <body name="aruco_fingertip_left_link" pos="-0.00441711 -0.0320457 0" quat="0.72509 0.597718 0.217552 0.263911">
+                                          <inertial pos="-3.3044e-06 -9.90744e-06 -0.000211788" mass="0.000123521" diaginertia="3.33209e-09 3.32884e-09 6.65796e-09" />
+                                          <geom name="aruco_fingertip_left_link_collision" class="collision" mass="0" mesh="aruco_fingertip_left_collision_link" />
+                                          <geom name="aruco_fingertip_left_link_visual" class="visualgeom" group="1" rgba="1 1 1 1" mass="0" mesh="aruco_fingertip_left_link" />
+                                        </body>
+                                      </body>
+                                    </body>
+                                  </body>
+                                </body>
+                              </body>
+                            </body>
+                          </body>
+                        </body>
+                        <body name="wrist_aruco_link" pos="-0.00867 0 0.0681105">
+                          <inertial pos="-8.97014e-06 2.99076e-06 -0.000313517" mass="0.000520488" diaginertia="3.83491e-08 3.83685e-08 7.66889e-08" />
+                          <geom name="wrist_aruco_link_collision" class="collision" mass="0" mesh="wrist_aruco_collision_link" />
+                          <geom name="wrist_aruco_link_visual" class="visualgeom" group="1" rgba="1 1 1 1" mass="0" mesh="wrist_aruco_link" />
+                        </body>
+                        <body name="wrist_reflector_link" pos="0.00665 0 0.0677605">
+                          <inertial pos="0.00377532 -3.85556e-12 0.00351761" mass="0.00171618" diaginertia="1.51128e-07 1.64146e-08 1.47242e-07" />
+                          <geom name="wrist_reflector_link_collision" class="collision" mass="0" mesh="wrist_reflector_collision_link" />
+                          <geom name="wrist_reflector_link_visual" class="visualgeom" group="1" rgba="0.15 0.15 0.15 1" mass="0" mesh="wrist_reflector_link" />
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="docking_contact_link" pos="0 0.1768 0.1075">
+          <inertial pos="0.000438849 -0.178577 -0.0110316" mass="18.9261" diaginertia="0.214993 0.22301 0.327846" />
+          <geom name="docking_contact_link_collision" class="collision" mass="0" mesh="docking_contact_link" />
+          <geom name="docking_contact_link_visual" class="visualgeom" group="1" rgba="0.9 0.9 0.88 1" mass="0" mesh="docking_contact_link" />
+        </body>
+      </body>
+      <body name="left_wheel_link" pos="0.150688 0.087 0.0742" quat="0.612372 -0.612372 0.353553 -0.353553">
+        <inertial pos="-1.23869e-05 5.05445e-06 -0.000272307" quat="0.135814 0.693941 -0.135814 0.693941" mass="5.91084" diaginertia="0.0295034 0.0152963 0.0152901" />
+        <joint name="left_wheel_joint" />
+        <geom class="visualgeom" rgba="0.15 0.15 0.15 1" mass="0" mesh="wheel_0_link" />
+        <geom name="left_wheel_link" class="omniwheel_collision" mass="0" />
+      </body>
+      <body name="back_wheel_link" pos="-0.150688 0.087 0.0742" quat="0.612372 -0.612372 -0.353553 0.353553">
+        <inertial pos="-1.23869e-05 5.05445e-06 -0.000272307" quat="0.135814 0.693941 -0.135814 0.693941" mass="5.91084" diaginertia="0.0295034 0.0152963 0.0152901" />
+        <joint name="back_wheel_joint" />
+        <geom class="visualgeom" rgba="0.15 0.15 0.15 1" mass="0" mesh="wheel_1_link" />
+        <geom name="back_wheel_link" class="omniwheel_collision" mass="0" />
+      </body>
+      <body name="right_wheel_link" pos="0 -0.174 0.0742" quat="0 0 0.707107 -0.707107">
+        <inertial pos="-1.23869e-05 5.05445e-06 -0.000272307" quat="0.135814 0.693941 -0.135814 0.693941" mass="5.91084" diaginertia="0.0295034 0.0152963 0.0152901" />
+        <joint name="right_wheel_joint" />
+        <geom class="visualgeom" rgba="0.15 0.15 0.15 1" mass="0" mesh="wheel_2_link" />
+        <geom name="right_wheel_link" class="omniwheel_collision" mass="0" />
+      </body>
+      <body name="laser" pos="0 0 0.2" quat="0 0 0 1">
+        <site name="lidar000" quat="0.707107 0 0.707107 0" />
+        <site name="lidar001" quat="0.70708 -0.0061706 0.70708 0.0061706" />
+        <site name="lidar002" quat="0.706999 -0.0123407 0.706999 0.0123407" />
+        <site name="lidar003" quat="0.706864 -0.0185099 0.706864 0.0185099" />
+        <site name="lidar004" quat="0.706676 -0.0246777 0.706676 0.0246777" />
+        <site name="lidar005" quat="0.706434 -0.0308436 0.706434 0.0308436" />
+        <site name="lidar006" quat="0.706138 -0.0370071 0.706138 0.0370071" />
+        <site name="lidar007" quat="0.705788 -0.0431679 0.705788 0.0431679" />
+        <site name="lidar008" quat="0.705384 -0.0493253 0.705384 0.0493253" />
+        <site name="lidar009" quat="0.704927 -0.055479 0.704927 0.055479" />
+        <site name="lidar010" quat="0.704416 -0.0616284 0.704416 0.0616284" />
+        <site name="lidar011" quat="0.703851 -0.0677732 0.703851 0.0677732" />
+        <site name="lidar012" quat="0.703233 -0.0739128 0.703233 0.0739128" />
+        <site name="lidar013" quat="0.702561 -0.0800468 0.702561 0.0800468" />
+        <site name="lidar014" quat="0.701836 -0.0861747 0.701836 0.0861747" />
+        <site name="lidar015" quat="0.701057 -0.092296 0.701057 0.092296" />
+        <site name="lidar016" quat="0.700225 -0.0984103 0.700225 0.0984103" />
+        <site name="lidar017" quat="0.69934 -0.104517 0.69934 0.104517" />
+        <site name="lidar018" quat="0.698401 -0.110616 0.698401 0.110616" />
+        <site name="lidar019" quat="0.697409 -0.116706 0.697409 0.116706" />
+        <site name="lidar020" quat="0.696364 -0.122788 0.696364 0.122788" />
+        <site name="lidar021" quat="0.695266 -0.12886 0.695266 0.12886" />
+        <site name="lidar022" quat="0.694115 -0.134922 0.694115 0.134922" />
+        <site name="lidar023" quat="0.692911 -0.140974 0.692911 0.140974" />
+        <site name="lidar024" quat="0.691655 -0.147016 0.691655 0.147016" />
+        <site name="lidar025" quat="0.690346 -0.153046 0.690346 0.153046" />
+        <site name="lidar026" quat="0.688984 -0.159064 0.688984 0.159064" />
+        <site name="lidar027" quat="0.687569 -0.165071 0.687569 0.165071" />
+        <site name="lidar028" quat="0.686103 -0.171065 0.686103 0.171065" />
+        <site name="lidar029" quat="0.684584 -0.177045 0.684584 0.177045" />
+        <site name="lidar030" quat="0.683013 -0.183013 0.683013 0.183013" />
+        <site name="lidar031" quat="0.68139 -0.188966 0.68139 0.188966" />
+        <site name="lidar032" quat="0.679715 -0.194905 0.679715 0.194905" />
+        <site name="lidar033" quat="0.677988 -0.200829 0.677988 0.200829" />
+        <site name="lidar034" quat="0.67621 -0.206738 0.67621 0.206738" />
+        <site name="lidar035" quat="0.67438 -0.212631 0.67438 0.212631" />
+        <site name="lidar036" quat="0.672498 -0.218508 0.672498 0.218508" />
+        <site name="lidar037" quat="0.670566 -0.224368 0.670566 0.224368" />
+        <site name="lidar038" quat="0.668583 -0.230212 0.668583 0.230212" />
+        <site name="lidar039" quat="0.666548 -0.236037 0.666548 0.236037" />
+        <site name="lidar040" quat="0.664463 -0.241845 0.664463 0.241845" />
+        <site name="lidar041" quat="0.662327 -0.247634 0.662327 0.247634" />
+        <site name="lidar042" quat="0.660141 -0.253405 0.660141 0.253405" />
+        <site name="lidar043" quat="0.657905 -0.259156 0.657905 0.259156" />
+        <site name="lidar044" quat="0.655618 -0.264887 0.655618 0.264887" />
+        <site name="lidar045" quat="0.653281 -0.270598 0.653281 0.270598" />
+        <site name="lidar046" quat="0.650895 -0.276289 0.650895 0.276289" />
+        <site name="lidar047" quat="0.648459 -0.281958 0.648459 0.281958" />
+        <site name="lidar048" quat="0.645974 -0.287606 0.645974 0.287606" />
+        <site name="lidar049" quat="0.64344 -0.293233 0.64344 0.293233" />
+        <site name="lidar050" quat="0.640856 -0.298836 0.640856 0.298836" />
+        <site name="lidar051" quat="0.638224 -0.304417 0.638224 0.304417" />
+        <site name="lidar052" quat="0.635543 -0.309975 0.635543 0.309975" />
+        <site name="lidar053" quat="0.632814 -0.31551 0.632814 0.31551" />
+        <site name="lidar054" quat="0.630037 -0.32102 0.630037 0.32102" />
+        <site name="lidar055" quat="0.627211 -0.326506 0.627211 0.326506" />
+        <site name="lidar056" quat="0.624338 -0.331967 0.624338 0.331967" />
+        <site name="lidar057" quat="0.621417 -0.337402 0.621417 0.337402" />
+        <site name="lidar058" quat="0.618449 -0.342812 0.618449 0.342812" />
+        <site name="lidar059" quat="0.615434 -0.348196 0.615434 0.348196" />
+        <site name="lidar060" quat="0.612372 -0.353554 0.612372 0.353554" />
+        <site name="lidar061" quat="0.609264 -0.358884 0.609264 0.358884" />
+        <site name="lidar062" quat="0.606109 -0.364187 0.606109 0.364187" />
+        <site name="lidar063" quat="0.602908 -0.369462 0.602908 0.369462" />
+        <site name="lidar064" quat="0.59966 -0.37471 0.59966 0.37471" />
+        <site name="lidar065" quat="0.596368 -0.379928 0.596368 0.379928" />
+        <site name="lidar066" quat="0.59303 -0.385118 0.59303 0.385118" />
+        <site name="lidar067" quat="0.589646 -0.390279 0.589646 0.390279" />
+        <site name="lidar068" quat="0.586218 -0.395409 0.586218 0.395409" />
+        <site name="lidar069" quat="0.582745 -0.40051 0.582745 0.40051" />
+        <site name="lidar070" quat="0.579228 -0.40558 0.579228 0.40558" />
+        <site name="lidar071" quat="0.575666 -0.410619 0.575666 0.410619" />
+        <site name="lidar072" quat="0.572061 -0.415627 0.572061 0.415627" />
+        <site name="lidar073" quat="0.568413 -0.420603 0.568413 0.420603" />
+        <site name="lidar074" quat="0.56472 -0.425548 0.56472 0.425548" />
+        <site name="lidar075" quat="0.560985 -0.430459 0.560985 0.430459" />
+        <site name="lidar076" quat="0.557208 -0.435339 0.557208 0.435339" />
+        <site name="lidar077" quat="0.553387 -0.440184 0.553387 0.440184" />
+        <site name="lidar078" quat="0.549525 -0.444997 0.549525 0.444997" />
+        <site name="lidar079" quat="0.545621 -0.449775 0.545621 0.449775" />
+        <site name="lidar080" quat="0.541675 -0.45452 0.541675 0.45452" />
+        <site name="lidar081" quat="0.537688 -0.459229 0.537688 0.459229" />
+        <site name="lidar082" quat="0.53366 -0.463904 0.53366 0.463904" />
+        <site name="lidar083" quat="0.529592 -0.468543 0.529592 0.468543" />
+        <site name="lidar084" quat="0.525483 -0.473147 0.525483 0.473147" />
+        <site name="lidar085" quat="0.521334 -0.477715 0.521334 0.477715" />
+        <site name="lidar086" quat="0.517145 -0.482246 0.517145 0.482246" />
+        <site name="lidar087" quat="0.512917 -0.48674 0.512917 0.48674" />
+        <site name="lidar088" quat="0.50865 -0.491198 0.50865 0.491198" />
+        <site name="lidar089" quat="0.504344 -0.495618 0.504344 0.495618" />
+        <site name="lidar090" quat="0.5 -0.5 0.5 0.5" />
+        <site name="lidar091" quat="0.495618 -0.504344 0.495618 0.504344" />
+        <site name="lidar092" quat="0.491197 -0.50865 0.491197 0.50865" />
+        <site name="lidar093" quat="0.48674 -0.512917 0.48674 0.512917" />
+        <site name="lidar094" quat="0.482245 -0.517145 0.482245 0.517145" />
+        <site name="lidar095" quat="0.477714 -0.521334 0.477714 0.521334" />
+        <site name="lidar096" quat="0.473147 -0.525483 0.473147 0.525483" />
+        <site name="lidar097" quat="0.468543 -0.529592 0.468543 0.529592" />
+        <site name="lidar098" quat="0.463904 -0.53366 0.463904 0.53366" />
+        <site name="lidar099" quat="0.459229 -0.537688 0.459229 0.537688" />
+        <site name="lidar100" quat="0.454519 -0.541675 0.454519 0.541675" />
+        <site name="lidar101" quat="0.449775 -0.545621 0.449775 0.545621" />
+        <site name="lidar102" quat="0.444997 -0.549525 0.444997 0.549525" />
+        <site name="lidar103" quat="0.440184 -0.553388 0.440184 0.553388" />
+        <site name="lidar104" quat="0.435338 -0.557208 0.435338 0.557208" />
+        <site name="lidar105" quat="0.430459 -0.560986 0.430459 0.560986" />
+        <site name="lidar106" quat="0.425547 -0.564721 0.425547 0.564721" />
+        <site name="lidar107" quat="0.420603 -0.568413 0.420603 0.568413" />
+        <site name="lidar108" quat="0.415627 -0.572062 0.415627 0.572062" />
+        <site name="lidar109" quat="0.410619 -0.575667 0.410619 0.575667" />
+        <site name="lidar110" quat="0.40558 -0.579228 0.40558 0.579228" />
+        <site name="lidar111" quat="0.400509 -0.582745 0.400509 0.582745" />
+        <site name="lidar112" quat="0.395409 -0.586218 0.395409 0.586218" />
+        <site name="lidar113" quat="0.390278 -0.589646 0.390278 0.589646" />
+        <site name="lidar114" quat="0.385118 -0.59303 0.385118 0.59303" />
+        <site name="lidar115" quat="0.379928 -0.596368 0.379928 0.596368" />
+        <site name="lidar116" quat="0.374709 -0.599661 0.374709 0.599661" />
+        <site name="lidar117" quat="0.369462 -0.602908 0.369462 0.602908" />
+        <site name="lidar118" quat="0.364187 -0.606109 0.364187 0.606109" />
+        <site name="lidar119" quat="0.358884 -0.609264 0.358884 0.609264" />
+        <site name="lidar120" quat="0.353553 -0.612373 0.353553 0.612373" />
+        <site name="lidar121" quat="0.348196 -0.615435 0.348196 0.615435" />
+        <site name="lidar122" quat="0.342812 -0.61845 0.342812 0.61845" />
+        <site name="lidar123" quat="0.337402 -0.621418 0.337402 0.621418" />
+        <site name="lidar124" quat="0.331966 -0.624338 0.331966 0.624338" />
+        <site name="lidar125" quat="0.326505 -0.627212 0.326505 0.627212" />
+        <site name="lidar126" quat="0.321019 -0.630037 0.321019 0.630037" />
+        <site name="lidar127" quat="0.315509 -0.632814 0.315509 0.632814" />
+        <site name="lidar128" quat="0.309975 -0.635544 0.309975 0.635544" />
+        <site name="lidar129" quat="0.304417 -0.638224 0.304417 0.638224" />
+        <site name="lidar130" quat="0.298836 -0.640857 0.298836 0.640857" />
+        <site name="lidar131" quat="0.293232 -0.64344 0.293232 0.64344" />
+        <site name="lidar132" quat="0.287606 -0.645974 0.287606 0.645974" />
+        <site name="lidar133" quat="0.281958 -0.64846 0.281958 0.64846" />
+        <site name="lidar134" quat="0.276288 -0.650895 0.276288 0.650895" />
+        <site name="lidar135" quat="0.270598 -0.653282 0.270598 0.653282" />
+        <site name="lidar136" quat="0.264887 -0.655618 0.264887 0.655618" />
+        <site name="lidar137" quat="0.259155 -0.657905 0.259155 0.657905" />
+        <site name="lidar138" quat="0.253404 -0.660141 0.253404 0.660141" />
+        <site name="lidar139" quat="0.247634 -0.662327 0.247634 0.662327" />
+        <site name="lidar140" quat="0.241844 -0.664463 0.241844 0.664463" />
+        <site name="lidar141" quat="0.236037 -0.666548 0.236037 0.666548" />
+        <site name="lidar142" quat="0.230211 -0.668583 0.230211 0.668583" />
+        <site name="lidar143" quat="0.224368 -0.670566 0.224368 0.670566" />
+        <site name="lidar144" quat="0.218508 -0.672499 0.218508 0.672499" />
+        <site name="lidar145" quat="0.212631 -0.67438 0.212631 0.67438" />
+        <site name="lidar146" quat="0.206738 -0.67621 0.206738 0.67621" />
+        <site name="lidar147" quat="0.200829 -0.677988 0.200829 0.677988" />
+        <site name="lidar148" quat="0.194905 -0.679715 0.194905 0.679715" />
+        <site name="lidar149" quat="0.188966 -0.68139 0.188966 0.68139" />
+        <site name="lidar150" quat="0.183012 -0.683013 0.183012 0.683013" />
+        <site name="lidar151" quat="0.177045 -0.684584 0.177045 0.684584" />
+        <site name="lidar152" quat="0.171064 -0.686103 0.171064 0.686103" />
+        <site name="lidar153" quat="0.16507 -0.687569 0.16507 0.687569" />
+        <site name="lidar154" quat="0.159064 -0.688984 0.159064 0.688984" />
+        <site name="lidar155" quat="0.153046 -0.690346 0.153046 0.690346" />
+        <site name="lidar156" quat="0.147015 -0.691655 0.147015 0.691655" />
+        <site name="lidar157" quat="0.140974 -0.692911 0.140974 0.692911" />
+        <site name="lidar158" quat="0.134922 -0.694115 0.134922 0.694115" />
+        <site name="lidar159" quat="0.12886 -0.695266 0.12886 0.695266" />
+        <site name="lidar160" quat="0.122787 -0.696364 0.122787 0.696364" />
+        <site name="lidar161" quat="0.116706 -0.697409 0.116706 0.697409" />
+        <site name="lidar162" quat="0.110615 -0.698401 0.110615 0.698401" />
+        <site name="lidar163" quat="0.104517 -0.69934 0.104517 0.69934" />
+        <site name="lidar164" quat="0.0984098 -0.700225 0.0984098 0.700225" />
+        <site name="lidar165" quat="0.0922955 -0.701057 0.0922955 0.701057" />
+        <site name="lidar166" quat="0.0861742 -0.701836 0.0861742 0.701836" />
+        <site name="lidar167" quat="0.0800463 -0.702561 0.0800463 0.702561" />
+        <site name="lidar168" quat="0.0739123 -0.703233 0.0739123 0.703233" />
+        <site name="lidar169" quat="0.0677727 -0.703851 0.0677727 0.703851" />
+        <site name="lidar170" quat="0.061628 -0.704416 0.061628 0.704416" />
+        <site name="lidar171" quat="0.0554785 -0.704927 0.0554785 0.704927" />
+        <site name="lidar172" quat="0.0493248 -0.705384 0.0493248 0.705384" />
+        <site name="lidar173" quat="0.0431674 -0.705788 0.0431674 0.705788" />
+        <site name="lidar174" quat="0.0370067 -0.706138 0.0370067 0.706138" />
+        <site name="lidar175" quat="0.0308431 -0.706434 0.0308431 0.706434" />
+        <site name="lidar176" quat="0.0246772 -0.706676 0.0246772 0.706676" />
+        <site name="lidar177" quat="0.0185094 -0.706864 0.0185094 0.706864" />
+        <site name="lidar178" quat="0.0123402 -0.706999 0.0123402 0.706999" />
+        <site name="lidar179" quat="0.00617012 -0.70708 0.00617012 0.70708" />
+        <site name="lidar180" quat="-4.76028e-07 -0.707107 -4.76028e-07 0.707107" />
+        <site name="lidar181" quat="-0.00617107 -0.70708 -0.00617107 0.70708" />
+        <site name="lidar182" quat="-0.0123412 -0.706999 -0.0123412 0.706999" />
+        <site name="lidar183" quat="-0.0185104 -0.706864 -0.0185104 0.706864" />
+        <site name="lidar184" quat="-0.0246782 -0.706676 -0.0246782 0.706676" />
+        <site name="lidar185" quat="-0.0308441 -0.706434 -0.0308441 0.706434" />
+        <site name="lidar186" quat="-0.0370076 -0.706138 -0.0370076 0.706138" />
+        <site name="lidar187" quat="-0.0431683 -0.705788 -0.0431683 0.705788" />
+        <site name="lidar188" quat="-0.0493258 -0.705384 -0.0493258 0.705384" />
+        <site name="lidar189" quat="-0.0554795 -0.704927 -0.0554795 0.704927" />
+        <site name="lidar190" quat="-0.0616289 -0.704416 -0.0616289 0.704416" />
+        <site name="lidar191" quat="-0.0677737 -0.703851 -0.0677737 0.703851" />
+        <site name="lidar192" quat="-0.0739133 -0.703233 -0.0739133 0.703233" />
+        <site name="lidar193" quat="-0.0800473 -0.702561 -0.0800473 0.702561" />
+        <site name="lidar194" quat="-0.0861751 -0.701836 -0.0861751 0.701836" />
+        <site name="lidar195" quat="-0.0922965 -0.701057 -0.0922965 0.701057" />
+        <site name="lidar196" quat="-0.0984108 -0.700225 -0.0984108 0.700225" />
+        <site name="lidar197" quat="-0.104518 -0.69934 -0.104518 0.69934" />
+        <site name="lidar198" quat="-0.110616 -0.698401 -0.110616 0.698401" />
+        <site name="lidar199" quat="-0.116707 -0.697409 -0.116707 0.697409" />
+        <site name="lidar200" quat="-0.122788 -0.696364 -0.122788 0.696364" />
+        <site name="lidar201" quat="-0.12886 -0.695266 -0.12886 0.695266" />
+        <site name="lidar202" quat="-0.134923 -0.694115 -0.134923 0.694115" />
+        <site name="lidar203" quat="-0.140975 -0.692911 -0.140975 0.692911" />
+        <site name="lidar204" quat="-0.147016 -0.691655 -0.147016 0.691655" />
+        <site name="lidar205" quat="-0.153046 -0.690345 -0.153046 0.690345" />
+        <site name="lidar206" quat="-0.159065 -0.688984 -0.159065 0.688984" />
+        <site name="lidar207" quat="-0.165071 -0.687569 -0.165071 0.687569" />
+        <site name="lidar208" quat="-0.171065 -0.686103 -0.171065 0.686103" />
+        <site name="lidar209" quat="-0.177046 -0.684584 -0.177046 0.684584" />
+        <site name="lidar210" quat="-0.183013 -0.683013 -0.183013 0.683013" />
+        <site name="lidar211" quat="-0.188967 -0.681389 -0.188967 0.681389" />
+        <site name="lidar212" quat="-0.194906 -0.679715 -0.194906 0.679715" />
+        <site name="lidar213" quat="-0.20083 -0.677988 -0.20083 0.677988" />
+        <site name="lidar214" quat="-0.206739 -0.676209 -0.206739 0.676209" />
+        <site name="lidar215" quat="-0.212632 -0.67438 -0.212632 0.67438" />
+        <site name="lidar216" quat="-0.218509 -0.672498 -0.218509 0.672498" />
+        <site name="lidar217" quat="-0.224369 -0.670566 -0.224369 0.670566" />
+        <site name="lidar218" quat="-0.230212 -0.668582 -0.230212 0.668582" />
+        <site name="lidar219" quat="-0.236038 -0.666548 -0.236038 0.666548" />
+        <site name="lidar220" quat="-0.241845 -0.664463 -0.241845 0.664463" />
+        <site name="lidar221" quat="-0.247635 -0.662327 -0.247635 0.662327" />
+        <site name="lidar222" quat="-0.253405 -0.660141 -0.253405 0.660141" />
+        <site name="lidar223" quat="-0.259156 -0.657904 -0.259156 0.657904" />
+        <site name="lidar224" quat="-0.264887 -0.655618 -0.264887 0.655618" />
+        <site name="lidar225" quat="-0.270599 -0.653281 -0.270599 0.653281" />
+        <site name="lidar226" quat="-0.276289 -0.650895 -0.276289 0.650895" />
+        <site name="lidar227" quat="-0.281959 -0.648459 -0.281959 0.648459" />
+        <site name="lidar228" quat="-0.287607 -0.645974 -0.287607 0.645974" />
+        <site name="lidar229" quat="-0.293233 -0.64344 -0.293233 0.64344" />
+        <site name="lidar230" quat="-0.298837 -0.640856 -0.298837 0.640856" />
+        <site name="lidar231" quat="-0.304418 -0.638224 -0.304418 0.638224" />
+        <site name="lidar232" quat="-0.309976 -0.635543 -0.309976 0.635543" />
+        <site name="lidar233" quat="-0.31551 -0.632814 -0.31551 0.632814" />
+        <site name="lidar234" quat="-0.32102 -0.630036 -0.32102 0.630036" />
+        <site name="lidar235" quat="-0.326506 -0.627211 -0.326506 0.627211" />
+        <site name="lidar236" quat="-0.331967 -0.624338 -0.331967 0.624338" />
+        <site name="lidar237" quat="-0.337403 -0.621417 -0.337403 0.621417" />
+        <site name="lidar238" quat="-0.342813 -0.618449 -0.342813 0.618449" />
+        <site name="lidar239" quat="-0.348197 -0.615434 -0.348197 0.615434" />
+        <site name="lidar240" quat="-0.353554 -0.612372 -0.353554 0.612372" />
+        <site name="lidar241" quat="-0.358884 -0.609263 -0.358884 0.609263" />
+        <site name="lidar242" quat="-0.364187 -0.606108 -0.364187 0.606108" />
+        <site name="lidar243" quat="-0.369463 -0.602907 -0.369463 0.602907" />
+        <site name="lidar244" quat="-0.37471 -0.59966 -0.37471 0.59966" />
+        <site name="lidar245" quat="-0.379929 -0.596367 -0.379929 0.596367" />
+        <site name="lidar246" quat="-0.385119 -0.593029 -0.385119 0.593029" />
+        <site name="lidar247" quat="-0.390279 -0.589646 -0.390279 0.589646" />
+        <site name="lidar248" quat="-0.39541 -0.586218 -0.39541 0.586218" />
+        <site name="lidar249" quat="-0.40051 -0.582745 -0.40051 0.582745" />
+        <site name="lidar250" quat="-0.40558 -0.579228 -0.40558 0.579228" />
+        <site name="lidar251" quat="-0.41062 -0.575666 -0.41062 0.575666" />
+        <site name="lidar252" quat="-0.415627 -0.572061 -0.415627 0.572061" />
+        <site name="lidar253" quat="-0.420604 -0.568412 -0.420604 0.568412" />
+        <site name="lidar254" quat="-0.425548 -0.56472 -0.425548 0.56472" />
+        <site name="lidar255" quat="-0.43046 -0.560985 -0.43046 0.560985" />
+        <site name="lidar256" quat="-0.435339 -0.557207 -0.435339 0.557207" />
+        <site name="lidar257" quat="-0.440185 -0.553387 -0.440185 0.553387" />
+        <site name="lidar258" quat="-0.444997 -0.549525 -0.444997 0.549525" />
+        <site name="lidar259" quat="-0.449776 -0.545621 -0.449776 0.545621" />
+        <site name="lidar260" quat="-0.45452 -0.541675 -0.45452 0.541675" />
+        <site name="lidar261" quat="-0.45923 -0.537688 -0.45923 0.537688" />
+        <site name="lidar262" quat="-0.463904 -0.53366 -0.463904 0.53366" />
+        <site name="lidar263" quat="-0.468544 -0.529591 -0.468544 0.529591" />
+        <site name="lidar264" quat="-0.473147 -0.525482 -0.473147 0.525482" />
+        <site name="lidar265" quat="-0.477715 -0.521333 -0.477715 0.521333" />
+        <site name="lidar266" quat="-0.482246 -0.517145 -0.482246 0.517145" />
+        <site name="lidar267" quat="-0.486741 -0.512917 -0.486741 0.512917" />
+        <site name="lidar268" quat="-0.491198 -0.50865 -0.491198 0.50865" />
+        <site name="lidar269" quat="-0.495618 -0.504344 -0.495618 0.504344" />
+        <site name="lidar270" quat="-0.500001 -0.499999 -0.500001 0.499999" />
+        <site name="lidar271" quat="-0.504345 -0.495617 -0.504345 0.495617" />
+        <site name="lidar272" quat="-0.508651 -0.491197 -0.508651 0.491197" />
+        <site name="lidar273" quat="-0.512918 -0.48674 -0.512918 0.48674" />
+        <site name="lidar274" quat="-0.517146 -0.482245 -0.517146 0.482245" />
+        <site name="lidar275" quat="-0.521334 -0.477714 -0.521334 0.477714" />
+        <site name="lidar276" quat="-0.525483 -0.473146 -0.525483 0.473146" />
+        <site name="lidar277" quat="-0.529592 -0.468543 -0.529592 0.468543" />
+        <site name="lidar278" quat="-0.533661 -0.463903 -0.533661 0.463903" />
+        <site name="lidar279" quat="-0.537689 -0.459229 -0.537689 0.459229" />
+        <site name="lidar280" quat="-0.541676 -0.454519 -0.541676 0.454519" />
+        <site name="lidar281" quat="-0.545621 -0.449775 -0.545621 0.449775" />
+        <site name="lidar282" quat="-0.549526 -0.444996 -0.549526 0.444996" />
+        <site name="lidar283" quat="-0.553388 -0.440184 -0.553388 0.440184" />
+        <site name="lidar284" quat="-0.557208 -0.435338 -0.557208 0.435338" />
+        <site name="lidar285" quat="-0.560986 -0.430459 -0.560986 0.430459" />
+        <site name="lidar286" quat="-0.564721 -0.425547 -0.564721 0.425547" />
+        <site name="lidar287" quat="-0.568413 -0.420603 -0.568413 0.420603" />
+        <site name="lidar288" quat="-0.572062 -0.415626 -0.572062 0.415626" />
+        <site name="lidar289" quat="-0.575667 -0.410618 -0.575667 0.410618" />
+        <site name="lidar290" quat="-0.579228 -0.405579 -0.579228 0.405579" />
+        <site name="lidar291" quat="-0.582746 -0.400509 -0.582746 0.400509" />
+        <site name="lidar292" quat="-0.586219 -0.395408 -0.586219 0.395408" />
+        <site name="lidar293" quat="-0.589647 -0.390278 -0.589647 0.390278" />
+        <site name="lidar294" quat="-0.59303 -0.385117 -0.59303 0.385117" />
+        <site name="lidar295" quat="-0.596368 -0.379928 -0.596368 0.379928" />
+        <site name="lidar296" quat="-0.599661 -0.374709 -0.599661 0.374709" />
+        <site name="lidar297" quat="-0.602908 -0.369462 -0.602908 0.369462" />
+        <site name="lidar298" quat="-0.606109 -0.364186 -0.606109 0.364186" />
+        <site name="lidar299" quat="-0.609264 -0.358883 -0.609264 0.358883" />
+        <site name="lidar300" quat="-0.612373 -0.353553 -0.612373 0.353553" />
+        <site name="lidar301" quat="-0.615435 -0.348195 -0.615435 0.348195" />
+        <site name="lidar302" quat="-0.61845 -0.342811 -0.61845 0.342811" />
+        <site name="lidar303" quat="-0.621418 -0.337401 -0.621418 0.337401" />
+        <site name="lidar304" quat="-0.624339 -0.331966 -0.624339 0.331966" />
+        <site name="lidar305" quat="-0.627212 -0.326505 -0.627212 0.326505" />
+        <site name="lidar306" quat="-0.630037 -0.321019 -0.630037 0.321019" />
+        <site name="lidar307" quat="-0.632815 -0.315509 -0.632815 0.315509" />
+        <site name="lidar308" quat="-0.635544 -0.309974 -0.635544 0.309974" />
+        <site name="lidar309" quat="-0.638225 -0.304417 -0.638225 0.304417" />
+        <site name="lidar310" quat="-0.640857 -0.298835 -0.640857 0.298835" />
+        <site name="lidar311" quat="-0.64344 -0.293232 -0.64344 0.293232" />
+        <site name="lidar312" quat="-0.645975 -0.287605 -0.645975 0.287605" />
+        <site name="lidar313" quat="-0.64846 -0.281957 -0.64846 0.281957" />
+        <site name="lidar314" quat="-0.650896 -0.276288 -0.650896 0.276288" />
+        <site name="lidar315" quat="-0.653282 -0.270597 -0.653282 0.270597" />
+        <site name="lidar316" quat="-0.655618 -0.264886 -0.655618 0.264886" />
+        <site name="lidar317" quat="-0.657905 -0.259155 -0.657905 0.259155" />
+        <site name="lidar318" quat="-0.660141 -0.253404 -0.660141 0.253404" />
+        <site name="lidar319" quat="-0.662328 -0.247633 -0.662328 0.247633" />
+        <site name="lidar320" quat="-0.664463 -0.241844 -0.664463 0.241844" />
+        <site name="lidar321" quat="-0.666548 -0.236036 -0.666548 0.236036" />
+        <site name="lidar322" quat="-0.668583 -0.230211 -0.668583 0.230211" />
+        <site name="lidar323" quat="-0.670566 -0.224367 -0.670566 0.224367" />
+        <site name="lidar324" quat="-0.672499 -0.218507 -0.672499 0.218507" />
+        <site name="lidar325" quat="-0.67438 -0.21263 -0.67438 0.21263" />
+        <site name="lidar326" quat="-0.67621 -0.206737 -0.67621 0.206737" />
+        <site name="lidar327" quat="-0.677988 -0.200828 -0.677988 0.200828" />
+        <site name="lidar328" quat="-0.679715 -0.194904 -0.679715 0.194904" />
+        <site name="lidar329" quat="-0.68139 -0.188965 -0.68139 0.188965" />
+        <site name="lidar330" quat="-0.683013 -0.183012 -0.683013 0.183012" />
+        <site name="lidar331" quat="-0.684584 -0.177045 -0.684584 0.177045" />
+        <site name="lidar332" quat="-0.686103 -0.171064 -0.686103 0.171064" />
+        <site name="lidar333" quat="-0.68757 -0.16507 -0.68757 0.16507" />
+        <site name="lidar334" quat="-0.688984 -0.159064 -0.688984 0.159064" />
+        <site name="lidar335" quat="-0.690346 -0.153045 -0.690346 0.153045" />
+        <site name="lidar336" quat="-0.691655 -0.147015 -0.691655 0.147015" />
+        <site name="lidar337" quat="-0.692912 -0.140974 -0.692912 0.140974" />
+        <site name="lidar338" quat="-0.694115 -0.134921 -0.694115 0.134921" />
+        <site name="lidar339" quat="-0.695266 -0.128859 -0.695266 0.128859" />
+        <site name="lidar340" quat="-0.696364 -0.122787 -0.696364 0.122787" />
+        <site name="lidar341" quat="-0.697409 -0.116705 -0.697409 0.116705" />
+        <site name="lidar342" quat="-0.698401 -0.110615 -0.698401 0.110615" />
+        <site name="lidar343" quat="-0.69934 -0.104516 -0.69934 0.104516" />
+        <site name="lidar344" quat="-0.700225 -0.0984093 -0.700225 0.0984093" />
+        <site name="lidar345" quat="-0.701058 -0.0922951 -0.701058 0.0922951" />
+        <site name="lidar346" quat="-0.701836 -0.0861737 -0.701836 0.0861737" />
+        <site name="lidar347" quat="-0.702562 -0.0800458 -0.702562 0.0800458" />
+        <site name="lidar348" quat="-0.703233 -0.0739119 -0.703233 0.0739119" />
+        <site name="lidar349" quat="-0.703851 -0.0677723 -0.703851 0.0677723" />
+        <site name="lidar350" quat="-0.704416 -0.0616275 -0.704416 0.0616275" />
+        <site name="lidar351" quat="-0.704927 -0.055478 -0.704927 0.055478" />
+        <site name="lidar352" quat="-0.705384 -0.0493243 -0.705384 0.0493243" />
+        <site name="lidar353" quat="-0.705788 -0.0431669 -0.705788 0.0431669" />
+        <site name="lidar354" quat="-0.706138 -0.0370062 -0.706138 0.0370062" />
+        <site name="lidar355" quat="-0.706434 -0.0308426 -0.706434 0.0308426" />
+        <site name="lidar356" quat="-0.706676 -0.0246767 -0.706676 0.0246767" />
+        <site name="lidar357" quat="-0.706864 -0.018509 -0.706864 0.018509" />
+        <site name="lidar358" quat="-0.706999 -0.0123398 -0.706999 0.0123398" />
+        <site name="lidar359" quat="-0.70708 -0.00616964 -0.70708 0.00616964" />
+      </body>
+    </body>
+  </worldbody>
+  <contact>
+    <pair geom1="floor" geom2="base_link_collision" friction="0 0" />
+    <pair geom1="floor" geom2="left_wheel_link" friction="0.001" solref="0.005" />
+    <pair geom1="floor" geom2="back_wheel_link" friction="0.001" solref="0.005" />
+    <pair geom1="floor" geom2="right_wheel_link" friction="0.001" solref="0.005" />
+    <exclude body1="base_link" body2="mast_link" />
+    <exclude body1="base_link" body2="left_wheel_link" />
+    <exclude body1="base_link" body2="back_wheel_link" />
+    <exclude body1="base_link" body2="right_wheel_link" />
+    <exclude body1="mast_link" body2="lift_link" />
+    <exclude body1="lift_link" body2="arm_l1_link" />
+    <exclude body1="lift_link" body2="arm_l2_link" />
+    <exclude body1="lift_link" body2="arm_l3_link" />
+    <exclude body1="lift_link" body2="arm_l4_link" />
+    <exclude body1="arm_l0_link" body2="arm_l1_link" />
+    <exclude body1="arm_l0_link" body2="arm_l2_link" />
+    <exclude body1="arm_l0_link" body2="arm_l3_link" />
+    <exclude body1="arm_l0_link" body2="arm_l4_link" />
+    <exclude body1="arm_l0_link" body2="wrist_yaw_link" />
+    <exclude body1="arm_l1_link" body2="arm_l2_link" />
+    <exclude body1="arm_l1_link" body2="arm_l3_link" />
+    <exclude body1="arm_l1_link" body2="arm_l4_link" />
+    <exclude body1="arm_l1_link" body2="wrist_yaw_link" />
+    <exclude body1="arm_l2_link" body2="arm_l4_link" />
+    <exclude body1="arm_l2_link" body2="wrist_yaw_link" />
+    <exclude body1="arm_l3_link" body2="arm_l4_link" />
+    <exclude body1="arm_l3_link" body2="wrist_yaw_link" />
+    <exclude body1="arm_l4_link" body2="wrist_yaw_link" />
+    <exclude body1="wrist_yaw_link" body2="gripper_finger_right_link" />
+    <exclude body1="wrist_yaw_link" body2="gripper_finger_left_link" />
+    <exclude body1="wrist_pitch_link" body2="gripper_finger_right_link" />
+    <exclude body1="wrist_pitch_link" body2="gripper_finger_left_link" />
+    <exclude body1="grasp_center_link" body2="gripper_finger_right_link" />
+    <exclude body1="grasp_center_link" body2="gripper_finger_left_link" />
+    <exclude body1="gripper_finger_right_link" body2="gripper_finger_left_link" />
+    <exclude body1="gripper_finger_right_link" body2="gripper_fingertip_left_link" />
+    <exclude body1="gripper_finger_right_link" body2="aruco_fingertip_left_link" />
+    <exclude body1="gripper_fingertip_right_link" body2="gripper_finger_left_link" />
+    <exclude body1="gripper_fingertip_right_link" body2="gripper_fingertip_left_link" />
+    <exclude body1="gripper_fingertip_right_link" body2="aruco_fingertip_left_link" />
+    <exclude body1="aruco_fingertip_right_link" body2="gripper_finger_left_link" />
+    <exclude body1="aruco_fingertip_right_link" body2="gripper_fingertip_left_link" />
+    <exclude body1="aruco_fingertip_right_link" body2="aruco_fingertip_left_link" />
+  </contact>
+  <tendon>
+    <fixed name="extend">
+      <joint joint="arm_l4_joint" coef="1" />
+      <joint joint="arm_l3_joint" coef="1" />
+      <joint joint="arm_l2_joint" coef="1" />
+      <joint joint="arm_l1_joint" coef="1" />
+    </fixed>
+  </tendon>
+  <equality>
+    <joint joint1="arm_l4_joint" joint2="arm_l3_joint" />
+    <joint joint1="arm_l3_joint" joint2="arm_l2_joint" />
+    <joint joint1="arm_l2_joint" joint2="arm_l1_joint" />
+    <joint joint1="gripper_finger_left_joint" joint2="gripper_finger_right_joint" />
+  </equality>
+  <actuator>
+    <general name="back_wheel_vel" class="wheel" joint="back_wheel_joint" />
+    <general name="right_wheel_vel" class="wheel" joint="right_wheel_joint" />
+    <general name="left_wheel_vel" class="wheel" joint="left_wheel_joint" />
+    <general name="lift" class="lift_stretch4" joint="lift_joint" ctrlrange="0 1.2" ctrllimited="true" biasprm="0 -500" />
+    <general name="arm" class="telescope" tendon="extend" ctrlrange="0 0.52" ctrllimited="true" biasprm="0 -500" />
+    <general name="wrist_yaw" class="wrist_yaw_stretch4" joint="wrist_yaw_joint" ctrlrange="-1.135 4.276" ctrllimited="true" />
+    <general name="wrist_pitch" class="wrist_pitch_stretch4" joint="wrist_pitch_joint" ctrlrange="-1.135 4.276" ctrllimited="true" />
+    <general name="wrist_roll" class="wrist_roll_stretch4" joint="wrist_roll_joint" ctrlrange="-4.276 1.135" ctrllimited="true" />
+    <general name="gripper" class="gripper_right_finger" joint="gripper_finger_right_joint" ctrllimited="true" />
+  </actuator>
+  <sensor>
+    <gyro site="imu" name="base_gyro" />
+    <accelerometer site="imu" name="base_accel" />
+  </sensor>
+  <keyframe>
+    <key name="home000" />
+    <key name="stow000" />
+    <key name="home001" />
+    <key name="stow001" />
+    <key name="home002" />
+    <key name="stow002" />
+    <key name="home003" />
+    <key name="stow003" />
+    <key name="home004" />
+    <key name="stow004" />
+    <key name="home005" />
+    <key name="stow005" />
+    <key name="home006" />
+    <key name="stow006" />
+    <key name="home007" />
+    <key name="stow007" />
+    <key name="home008" />
+    <key name="stow008" />
+    <key name="home009" />
+    <key name="stow009" />
+    <key name="home010" />
+    <key name="stow010" />
+    <key name="home011" />
+    <key name="stow011" />
+    <key name="home012" />
+    <key name="stow012" />
+    <key name="home013" />
+    <key name="stow013" />
+    <key name="home014" />
+    <key name="stow014" />
+    <key name="home015" />
+    <key name="stow015" />
+    <key name="home016" />
+    <key name="stow016" />
+    <key name="home017" />
+    <key name="stow017" />
+    <key name="home018" />
+    <key name="stow018" />
+    <key name="home019" />
+    <key name="stow019" />
+    <key name="home020" />
+    <key name="stow020" />
+    <key name="home021" />
+    <key name="stow021" />
+    <key name="home022" />
+    <key name="stow022" />
+    <key name="home023" />
+    <key name="stow023" />
+    <key name="home024" />
+    <key name="stow024" />
+    <key name="home025" />
+    <key name="stow025" />
+    <key name="home026" />
+    <key name="stow026" />
+    <key name="home027" />
+    <key name="stow027" />
+    <key name="home028" />
+    <key name="stow028" />
+    <key name="home029" />
+    <key name="stow029" />
+    <key name="home030" />
+    <key name="stow030" />
+    <key name="home031" />
+    <key name="stow031" />
+    <key name="home032" />
+    <key name="stow032" />
+    <key name="home033" />
+    <key name="stow033" />
+    <key name="home034" />
+    <key name="stow034" />
+    <key name="home035" />
+    <key name="stow035" />
+    <key name="home036" />
+    <key name="stow036" />
+    <key name="home037" />
+    <key name="stow037" />
+    <key name="home038" />
+    <key name="stow038" />
+    <key name="home039" />
+    <key name="stow039" />
+    <key name="home040" />
+    <key name="stow040" />
+    <key name="home041" />
+    <key name="stow041" />
+    <key name="home042" />
+    <key name="stow042" />
+    <key name="home043" />
+    <key name="stow043" />
+    <key name="home044" />
+    <key name="stow044" />
+    <key name="home045" />
+    <key name="stow045" />
+    <key name="home046" />
+    <key name="stow046" />
+    <key name="home047" />
+    <key name="stow047" />
+    <key name="home048" />
+    <key name="stow048" />
+    <key name="home049" />
+    <key name="stow049" />
+    <key name="home050" />
+    <key name="stow050" />
+    <key name="home051" />
+    <key name="stow051" />
+    <key name="home052" />
+    <key name="stow052" />
+    <key name="home053" />
+    <key name="stow053" />
+    <key name="home054" />
+    <key name="stow054" />
+    <key name="home055" />
+    <key name="stow055" />
+    <key name="home056" />
+    <key name="stow056" />
+    <key name="home057" />
+    <key name="stow057" />
+    <key name="home058" />
+    <key name="stow058" />
+    <key name="home059" />
+    <key name="stow059" />
+    <key name="home060" />
+    <key name="stow060" />
+    <key name="home061" />
+    <key name="stow061" />
+    <key name="home062" />
+    <key name="stow062" />
+    <key name="home063" />
+    <key name="stow063" />
+    <key name="home064" />
+    <key name="stow064" />
+    <key name="home065" />
+    <key name="stow065" />
+    <key name="home066" />
+    <key name="stow066" />
+    <key name="home067" />
+    <key name="stow067" />
+    <key name="home068" />
+    <key name="stow068" />
+    <key name="home069" />
+    <key name="stow069" />
+    <key name="home070" />
+    <key name="stow070" />
+    <key name="home071" />
+    <key name="stow071" />
+    <key name="home072" />
+    <key name="stow072" />
+    <key name="home073" />
+    <key name="stow073" />
+    <key name="home074" />
+    <key name="stow074" />
+    <key name="home075" />
+    <key name="stow075" />
+    <key name="home076" />
+    <key name="stow076" />
+    <key name="home077" />
+    <key name="stow077" />
+    <key name="home078" />
+    <key name="stow078" />
+    <key name="home079" />
+    <key name="stow079" />
+    <key name="home080" />
+    <key name="stow080" />
+    <key name="home081" />
+    <key name="stow081" />
+    <key name="home082" />
+    <key name="stow082" />
+    <key name="home083" />
+    <key name="stow083" />
+    <key name="home084" />
+    <key name="stow084" />
+    <key name="home085" />
+    <key name="stow085" />
+    <key name="home086" />
+    <key name="stow086" />
+    <key name="home087" />
+    <key name="stow087" />
+    <key name="home088" />
+    <key name="stow088" />
+    <key name="home089" />
+    <key name="stow089" />
+    <key name="home090" />
+    <key name="stow090" />
+    <key name="home091" />
+    <key name="stow091" />
+    <key name="home092" />
+    <key name="stow092" />
+    <key name="home093" />
+    <key name="stow093" />
+    <key name="home094" />
+    <key name="stow094" />
+    <key name="home095" />
+    <key name="stow095" />
+    <key name="home096" />
+    <key name="stow096" />
+    <key name="home097" />
+    <key name="stow097" />
+    <key name="home098" />
+    <key name="stow098" />
+    <key name="home099" />
+    <key name="stow099" />
+    <key name="home100" />
+    <key name="stow100" />
+    <key name="home101" />
+    <key name="stow101" />
+    <key name="home102" />
+    <key name="stow102" />
+    <key name="home103" />
+    <key name="stow103" />
+    <key name="home104" />
+    <key name="stow104" />
+    <key name="home105" />
+    <key name="stow105" />
+    <key name="home106" />
+    <key name="stow106" />
+    <key name="home107" />
+    <key name="stow107" />
+    <key name="home108" />
+    <key name="stow108" />
+    <key name="home109" />
+    <key name="stow109" />
+    <key name="home110" />
+    <key name="stow110" />
+    <key name="home111" />
+    <key name="stow111" />
+    <key name="home112" />
+    <key name="stow112" />
+    <key name="home113" />
+    <key name="stow113" />
+    <key name="home114" />
+    <key name="stow114" />
+    <key name="home115" />
+    <key name="stow115" />
+    <key name="home116" />
+    <key name="stow116" />
+    <key name="home117" />
+    <key name="stow117" />
+    <key name="home118" />
+    <key name="stow118" />
+    <key name="home119" />
+    <key name="stow119" />
+    <key name="home120" />
+    <key name="stow120" />
+    <key name="home121" />
+    <key name="stow121" />
+    <key name="home122" />
+    <key name="stow122" />
+    <key name="home123" />
+    <key name="stow123" />
+    <key name="home124" />
+    <key name="stow124" />
+    <key name="home125" />
+    <key name="stow125" />
+    <key name="home126" />
+    <key name="stow126" />
+    <key name="home127" />
+    <key name="stow127" />
+    <key name="home128" />
+    <key name="stow128" />
+    <key name="home129" />
+    <key name="stow129" />
+    <key name="home130" />
+    <key name="stow130" />
+    <key name="home131" />
+    <key name="stow131" />
+    <key name="home132" />
+    <key name="stow132" />
+    <key name="home133" />
+    <key name="stow133" />
+    <key name="home134" />
+    <key name="stow134" />
+    <key name="home135" />
+    <key name="stow135" />
+    <key name="home136" />
+    <key name="stow136" />
+    <key name="home137" />
+    <key name="stow137" />
+    <key name="home138" />
+    <key name="stow138" />
+    <key name="home139" />
+    <key name="stow139" />
+    <key name="home140" />
+    <key name="stow140" />
+    <key name="home141" />
+    <key name="stow141" />
+    <key name="home142" />
+    <key name="stow142" />
+    <key name="home143" />
+    <key name="stow143" />
+    <key name="home144" />
+    <key name="stow144" />
+    <key name="home145" />
+    <key name="stow145" />
+    <key name="home146" />
+    <key name="stow146" />
+    <key name="home147" />
+    <key name="stow147" />
+    <key name="home148" />
+    <key name="stow148" />
+    <key name="home149" />
+    <key name="stow149" />
+    <key name="home150" />
+    <key name="stow150" />
+    <key name="home151" />
+    <key name="stow151" />
+    <key name="home152" />
+    <key name="stow152" />
+    <key name="home153" />
+    <key name="stow153" />
+    <key name="home154" />
+    <key name="stow154" />
+    <key name="home155" />
+    <key name="stow155" />
+    <key name="home156" />
+    <key name="stow156" />
+    <key name="home157" />
+    <key name="stow157" />
+    <key name="home158" />
+    <key name="stow158" />
+    <key name="home159" />
+    <key name="stow159" />
+    <key name="home160" />
+    <key name="stow160" />
+    <key name="home161" />
+    <key name="stow161" />
+    <key name="home162" />
+    <key name="stow162" />
+    <key name="home163" />
+    <key name="stow163" />
+    <key name="home164" />
+    <key name="stow164" />
+    <key name="home165" />
+    <key name="stow165" />
+    <key name="home166" />
+    <key name="stow166" />
+    <key name="home167" />
+    <key name="stow167" />
+    <key name="home168" />
+    <key name="stow168" />
+    <key name="home169" />
+    <key name="stow169" />
+    <key name="home170" />
+    <key name="stow170" />
+    <key name="home171" />
+    <key name="stow171" />
+    <key name="home172" />
+    <key name="stow172" />
+    <key name="home173" />
+    <key name="stow173" />
+    <key name="home174" />
+    <key name="stow174" />
+    <key name="home175" />
+    <key name="stow175" />
+    <key name="home176" />
+    <key name="stow176" />
+    <key name="home177" />
+    <key name="stow177" />
+    <key name="home178" />
+    <key name="stow178" />
+    <key name="home179" />
+    <key name="stow179" />
+    <key name="home180" />
+    <key name="stow180" />
+    <key name="home181" />
+    <key name="stow181" />
+    <key name="home182" />
+    <key name="stow182" />
+    <key name="home183" />
+    <key name="stow183" />
+    <key name="home184" />
+    <key name="stow184" />
+    <key name="home185" />
+    <key name="stow185" />
+    <key name="home186" />
+    <key name="stow186" />
+    <key name="home187" />
+    <key name="stow187" />
+    <key name="home188" />
+    <key name="stow188" />
+    <key name="home189" />
+    <key name="stow189" />
+    <key name="home190" />
+    <key name="stow190" />
+    <key name="home191" />
+    <key name="stow191" />
+    <key name="home192" />
+    <key name="stow192" />
+    <key name="home193" />
+    <key name="stow193" />
+    <key name="home194" />
+    <key name="stow194" />
+    <key name="home195" />
+    <key name="stow195" />
+    <key name="home196" />
+    <key name="stow196" />
+    <key name="home197" />
+    <key name="stow197" />
+    <key name="home198" />
+    <key name="stow198" />
+    <key name="home199" />
+    <key name="stow199" />
+    <key name="home200" />
+    <key name="stow200" />
+    <key name="home201" />
+    <key name="stow201" />
+    <key name="home202" />
+    <key name="stow202" />
+    <key name="home203" />
+    <key name="stow203" />
+    <key name="home204" />
+    <key name="stow204" />
+    <key name="home205" />
+    <key name="stow205" />
+    <key name="home206" />
+    <key name="stow206" />
+    <key name="home207" />
+    <key name="stow207" />
+    <key name="home208" />
+    <key name="stow208" />
+    <key name="home209" />
+    <key name="stow209" />
+    <key name="home210" />
+    <key name="stow210" />
+    <key name="home211" />
+    <key name="stow211" />
+    <key name="home212" />
+    <key name="stow212" />
+    <key name="home213" />
+    <key name="stow213" />
+    <key name="home214" />
+    <key name="stow214" />
+    <key name="home215" />
+    <key name="stow215" />
+    <key name="home216" />
+    <key name="stow216" />
+    <key name="home217" />
+    <key name="stow217" />
+    <key name="home218" />
+    <key name="stow218" />
+    <key name="home219" />
+    <key name="stow219" />
+    <key name="home220" />
+    <key name="stow220" />
+    <key name="home221" />
+    <key name="stow221" />
+    <key name="home222" />
+    <key name="stow222" />
+    <key name="home223" />
+    <key name="stow223" />
+    <key name="home224" />
+    <key name="stow224" />
+    <key name="home225" />
+    <key name="stow225" />
+    <key name="home226" />
+    <key name="stow226" />
+    <key name="home227" />
+    <key name="stow227" />
+    <key name="home228" />
+    <key name="stow228" />
+    <key name="home229" />
+    <key name="stow229" />
+    <key name="home230" />
+    <key name="stow230" />
+    <key name="home231" />
+    <key name="stow231" />
+    <key name="home232" />
+    <key name="stow232" />
+    <key name="home233" />
+    <key name="stow233" />
+    <key name="home234" />
+    <key name="stow234" />
+    <key name="home235" />
+    <key name="stow235" />
+    <key name="home236" />
+    <key name="stow236" />
+    <key name="home237" />
+    <key name="stow237" />
+    <key name="home238" />
+    <key name="stow238" />
+    <key name="home239" />
+    <key name="stow239" />
+    <key name="home240" />
+    <key name="stow240" />
+    <key name="home241" />
+    <key name="stow241" />
+    <key name="home242" />
+    <key name="stow242" />
+    <key name="home243" />
+    <key name="stow243" />
+    <key name="home244" />
+    <key name="stow244" />
+    <key name="home245" />
+    <key name="stow245" />
+    <key name="home246" />
+    <key name="stow246" />
+    <key name="home247" />
+    <key name="stow247" />
+    <key name="home248" />
+    <key name="stow248" />
+    <key name="home249" />
+    <key name="stow249" />
+    <key name="home250" />
+    <key name="stow250" />
+    <key name="home251" />
+    <key name="stow251" />
+    <key name="home252" />
+    <key name="stow252" />
+    <key name="home253" />
+    <key name="stow253" />
+    <key name="home254" />
+    <key name="stow254" />
+    <key name="home255" />
+    <key name="stow255" />
+    <key name="home256" />
+    <key name="stow256" />
+    <key name="home257" />
+    <key name="stow257" />
+    <key name="home258" />
+    <key name="stow258" />
+    <key name="home259" />
+    <key name="stow259" />
+    <key name="home260" />
+    <key name="stow260" />
+    <key name="home261" />
+    <key name="stow261" />
+    <key name="home262" />
+    <key name="stow262" />
+    <key name="home263" />
+    <key name="stow263" />
+    <key name="home264" />
+    <key name="stow264" />
+    <key name="home265" />
+    <key name="stow265" />
+    <key name="home266" />
+    <key name="stow266" />
+    <key name="home267" />
+    <key name="stow267" />
+    <key name="home268" />
+    <key name="stow268" />
+    <key name="home269" />
+    <key name="stow269" />
+    <key name="home270" />
+    <key name="stow270" />
+    <key name="home271" />
+    <key name="stow271" />
+    <key name="home272" />
+    <key name="stow272" />
+    <key name="home273" />
+    <key name="stow273" />
+    <key name="home274" />
+    <key name="stow274" />
+    <key name="home275" />
+    <key name="stow275" />
+    <key name="home276" />
+    <key name="stow276" />
+    <key name="home277" />
+    <key name="stow277" />
+    <key name="home278" />
+    <key name="stow278" />
+    <key name="home279" />
+    <key name="stow279" />
+    <key name="home280" />
+    <key name="stow280" />
+    <key name="home281" />
+    <key name="stow281" />
+    <key name="home282" />
+    <key name="stow282" />
+    <key name="home283" />
+    <key name="stow283" />
+    <key name="home284" />
+    <key name="stow284" />
+    <key name="home285" />
+    <key name="stow285" />
+    <key name="home286" />
+    <key name="stow286" />
+    <key name="home287" />
+    <key name="stow287" />
+    <key name="home288" />
+    <key name="stow288" />
+    <key name="home289" />
+    <key name="stow289" />
+    <key name="home290" />
+    <key name="stow290" />
+    <key name="home291" />
+    <key name="stow291" />
+    <key name="home292" />
+    <key name="stow292" />
+    <key name="home293" />
+    <key name="stow293" />
+    <key name="home294" />
+    <key name="stow294" />
+    <key name="home295" />
+    <key name="stow295" />
+    <key name="home296" />
+    <key name="stow296" />
+    <key name="home297" />
+    <key name="stow297" />
+    <key name="home298" />
+    <key name="stow298" />
+    <key name="home299" />
+    <key name="stow299" />
+    <key name="home300" />
+    <key name="stow300" />
+    <key name="home301" />
+    <key name="stow301" />
+    <key name="home302" />
+    <key name="stow302" />
+    <key name="home303" />
+    <key name="stow303" />
+    <key name="home304" />
+    <key name="stow304" />
+    <key name="home305" />
+    <key name="stow305" />
+    <key name="home306" />
+    <key name="stow306" />
+    <key name="home307" />
+    <key name="stow307" />
+    <key name="home308" />
+    <key name="stow308" />
+    <key name="home309" />
+    <key name="stow309" />
+    <key name="home310" />
+    <key name="stow310" />
+    <key name="home311" />
+    <key name="stow311" />
+    <key name="home312" />
+    <key name="stow312" />
+    <key name="home313" />
+    <key name="stow313" />
+    <key name="home314" />
+    <key name="stow314" />
+    <key name="home315" />
+    <key name="stow315" />
+    <key name="home316" />
+    <key name="stow316" />
+    <key name="home317" />
+    <key name="stow317" />
+    <key name="home318" />
+    <key name="stow318" />
+    <key name="home319" />
+    <key name="stow319" />
+    <key name="home320" />
+    <key name="stow320" />
+    <key name="home321" />
+    <key name="stow321" />
+    <key name="home322" />
+    <key name="stow322" />
+    <key name="home323" />
+    <key name="stow323" />
+    <key name="home324" />
+    <key name="stow324" />
+    <key name="home325" />
+    <key name="stow325" />
+    <key name="home326" />
+    <key name="stow326" />
+    <key name="home327" />
+    <key name="stow327" />
+    <key name="home328" />
+    <key name="stow328" />
+    <key name="home329" />
+    <key name="stow329" />
+    <key name="home330" />
+    <key name="stow330" />
+    <key name="home331" />
+    <key name="stow331" />
+    <key name="home332" />
+    <key name="stow332" />
+    <key name="home333" />
+    <key name="stow333" />
+    <key name="home334" />
+    <key name="stow334" />
+    <key name="home335" />
+    <key name="stow335" />
+    <key name="home336" />
+    <key name="stow336" />
+    <key name="home337" />
+    <key name="stow337" />
+    <key name="home338" />
+    <key name="stow338" />
+    <key name="home339" />
+    <key name="stow339" />
+    <key name="home340" />
+    <key name="stow340" />
+    <key name="home341" />
+    <key name="stow341" />
+    <key name="home342" />
+    <key name="stow342" />
+    <key name="home343" />
+    <key name="stow343" />
+    <key name="home344" />
+    <key name="stow344" />
+    <key name="home345" />
+    <key name="stow345" />
+    <key name="home346" />
+    <key name="stow346" />
+    <key name="home347" />
+    <key name="stow347" />
+    <key name="home348" />
+    <key name="stow348" />
+    <key name="home349" />
+    <key name="stow349" />
+    <key name="home350" />
+    <key name="stow350" />
+    <key name="home351" />
+    <key name="stow351" />
+    <key name="home352" />
+    <key name="stow352" />
+    <key name="home353" />
+    <key name="stow353" />
+    <key name="home354" />
+    <key name="stow354" />
+    <key name="home355" />
+    <key name="stow355" />
+    <key name="home356" />
+    <key name="stow356" />
+    <key name="home357" />
+    <key name="stow357" />
+    <key name="home358" />
+    <key name="stow358" />
+    <key name="home359" />
+    <key name="stow359" />
+    <key name="home" ctrl="0 0 0 0.6 0.1 0 0 0 0" />
+    <key name="stow" ctrl="0 0 0 0.23 0 3.14 -0.4 0 0" />
+  </keyframe>
+</mujoco>

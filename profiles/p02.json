@@ -1,0 +1,73 @@
+{
+  "head_pitch": {
+    "axis": "pitch",
+    "sign": -1.0,
+    "neg_deg": 54.5,
+    "pos_deg": 29.0,
+    "neg_name": "extension",
+    "pos_name": "flexion"
+  },
+  "head_roll": {
+    "axis": "roll",
+    "sign": 1.0,
+    "neg_deg": 33.5,
+    "pos_deg": 42.5,
+    "neg_name": "lateral flexion (left)",
+    "pos_name": "lateral flexion (right)"
+  },
+  "head_yaw": {
+    "axis": "yaw",
+    "sign": 1.0,
+    "neg_deg": 51.0,
+    "pos_deg": 43.5,
+    "neg_name": "rotation (right)",
+    "pos_name": "rotation (left)"
+  },
+  "shoulder_elevation": {
+    "axis": "roll",
+    "sign": 1.0,
+    "neg_deg": 13.0,
+    "pos_deg": 30.0,
+    "neg_name": "depression",
+    "pos_name": "elevation"
+  },
+  "shoulder_protraction": {
+    "axis": "yaw",
+    "sign": -1.0,
+    "neg_deg": 9.0,
+    "pos_deg": 12.0,
+    "neg_name": "retraction",
+    "pos_name": "protraction"
+  },
+  "shoulder_side": "right",
+  "deadband_frac": 0.15,
+  "full_frac": 0.6,
+  "expo": 0.6,
+  "max_rate": {
+    "lift": 0.15,
+    "arm": 0.2,
+    "wrist_pitch": 1.0471975511965976,
+    "wrist_roll": 1.0471975511965976,
+    "wrist_yaw": 1.0471975511965976
+  },
+  "lift_sign": -1.0,
+  "arm_sign": -1.0,
+  "wrist_pitch_sign": -1.0,
+  "base_forward_sign": -1.0,
+  "base_turn_sign": 1.0,
+  "base_turn_fraction": 0.5,
+  "gripper_closed_is_hi": false,
+  "gestures": {
+    "flick_dps": 83.0,
+    "flick_hold_s": 0.03,
+    "flick_dominance": 1.5,
+    "rearm_dps": 33.2,
+    "double_window_s": 1.0,
+    "on_frac": 0.3,
+    "off_frac": 0.15,
+    "hold_s": 1.5,
+    "hold_direction": "down",
+    "lift_onset_s": 0.0,
+    "min_lockout_s": 0.3
+  }
+}

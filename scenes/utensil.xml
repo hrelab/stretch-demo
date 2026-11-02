@@ -1,0 +1,13 @@
+<!-- Spoon-like utensil held by the gripper in the feeding task. Mounted under the
+     robot's grasp body by sim/scene.py, in the TOOL frame: x points out of the
+     gripper, z is up when the wrist is at neutral. Non-colliding (contype 0): it's
+     a pointer whose tip the task tracks, so it can't snag on the plate or face. -->
+<body name="utensil">
+  <geom name="utensil_handle" type="capsule" fromto="-0.04 0 0  0.112 0 0" size="0.0065"
+        rgba=".78 .79 .83 1" contype="0" conaffinity="0" mass="0.02"/>
+  <geom name="utensil_bowl" type="ellipsoid" pos="0.135 0 0.002" size="0.027 0.017 0.005"
+        rgba=".78 .79 .83 1" contype="0" conaffinity="0" mass="0.005"/>
+  <site name="utensil_tip" pos="0.15 0 0" size="0.007" rgba="1 .25 .25 .7"/>
+  <!-- The bite: shown (alpha set by tasks/feeding.py) once the spoon is loaded. -->
+  <site name="food_on_utensil" type="sphere" pos="0.135 0 0.01" size="0.013" rgba=".85 .55 .2 0"/>
+</body>
