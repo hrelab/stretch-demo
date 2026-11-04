@@ -11,6 +11,7 @@ import time
 import mujoco
 import mujoco.viewer
 
+from stretch_demo.console import HELP, command_of
 from stretch_demo.sim.robot import ACTUATORS
 from stretch_demo.sim.scene import build_model
 
@@ -55,6 +56,7 @@ class SimHarness:
         self._initial = (self.data.qpos.copy(), self.data.ctrl.copy())
         self._tick = 0
         self._next_overlay = 0.0
+        self.quit = False
 
     # --- setup ---
 
@@ -96,10 +98,10 @@ class SimHarness:
         with mujoco.viewer.launch_passive(self.model, self.data,
                                           show_left_ui=False, show_right_ui=False) as viewer:
             self._aim_camera(viewer)
-            while viewer.is_running() and not console.quit_requested:
+            while viewer.is_running() and not self.quit:
                 started = time.time()
-                for command in console.take():
-                    self._handle(command, controller, log)
+                for line in console.take():
+                    self._handle(line, controller, log)
                 self._step_control(controller)
                 self._step_task(controller, log)
                 self._draw_overlay(viewer, controller, bus)
@@ -122,7 +124,13 @@ class SimHarness:
         self.task.step(self.model, self.data, controller.clock())
         log.write(self.task.take_trials())
 
-    def _handle(self, command: str, controller, log) -> None:
+    def _handle(self, line: str, controller, log) -> None:
+        """One line from the operator: initials if the task is waiting for them,
+        otherwise a command letter."""
+        if self.task.awaiting_initials():
+            self.task.submit_initials(line)
+            return
+        command = command_of(line)
         if command == "c":
             controller.recalibrate()
         elif command == "r":
@@ -130,6 +138,10 @@ class SimHarness:
             print("Task reset.")
         elif command == "n":
             self._next_visitor(controller, log)
+        elif command == "q":
+            self.quit = True
+        elif line.strip():  # h, or anything unrecognized
+            print(HELP)
 
     def _next_visitor(self, controller, log) -> None:
         self.reset_all()
@@ -160,10 +172,14 @@ class SimHarness:
             return
         self._next_overlay = now + OVERLAY_EVERY_S
         status = [("controller", controller.name), ("", controller.status()), ("IMUs", imu_health(bus))]
-        viewer.set_texts([
+        boxes = [
             _text_box(mujoco.mjtGridPos.mjGRID_TOPLEFT, self.task.overlay(now)),
             _text_box(mujoco.mjtGridPos.mjGRID_BOTTOMLEFT, status),
-        ])
+        ]
+        board = self.task.board_rows()
+        if board:
+            boxes.append(_text_box(mujoco.mjtGridPos.mjGRID_TOPRIGHT, board))
+        viewer.set_texts(boxes)
 
 
 def _text_box(gridpos, rows: list[tuple[str, str]]) -> tuple:

@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from stretch_demo.cli import CONTROLLERS, TASKS, make_source, parse_args
-from stretch_demo.console import Console
+from stretch_demo.console import Console, command_of
 from stretch_demo.imu.bus import ImuBus
 from stretch_demo.imu.fake_source import FakeSource
 from stretch_demo.imu.ximu_source import XimuSource
@@ -42,12 +42,14 @@ def test_imu_source_choice():
     assert isinstance(source, XimuSource) and source.ips == ("10.0.0.1", "10.0.0.2")
 
 
-def test_console_queues_commands_and_quits(capsys):
-    console = Console(io.StringIO("c\n  R \nq\nzzz\n"))
-    for line in console.stream:
-        console.push(line)
-    assert console.take() == ["c", "r"] and console.quit_requested
-    assert "Commands" in capsys.readouterr().out  # unknown input prints the help
+def test_console_queues_whole_lines():
+    console = Console(io.StringIO("c\n  R \nabc\n"))
+    console._read()
+    assert console.take() == ["c", "  R ", "abc"] and console.take() == []
+
+
+def test_command_of_reads_the_first_letter_only_for_known_commands():
+    assert [command_of(x) for x in ("  R ", "quit", "zzz", "")] == ["r", "q", None, None]
 
 
 def _complexipy() -> str:

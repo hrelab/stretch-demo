@@ -29,6 +29,7 @@ class Task:
     camera = ((0.6, 0.0, 0.6), 2.0, 55.0, -20.0)
 
     def __init__(self):
+        self.leaderboard = None         # set by the CLI; tasks with rounds use it
         self.trials: list[dict] = []    # this visitor's finished trials
         self._pending: list[dict] = []  # not yet handed to the log
         self.started_at: float | None = None
@@ -58,6 +59,17 @@ class Task:
     def overlay(self, now: float) -> list[tuple[str, str]]:
         raise NotImplementedError
 
+    def awaiting_initials(self) -> bool:
+        """True while a finished round waits for the operator to type initials."""
+        return False
+
+    def submit_initials(self, text: str) -> None:
+        """The operator's line while awaiting_initials()."""
+
+    def board_rows(self) -> list[tuple[str, str]]:
+        """Extra overlay box (top right), e.g. the leaderboard. Empty = none."""
+        return []
+
     def take_trials(self) -> list[dict]:
         out, self._pending = self._pending, []
         return out
@@ -78,6 +90,28 @@ class Task:
 
     def successes(self) -> list[dict]:
         return [t for t in self.trials if t["result"] == "success"]
+
+
+class ContactDebounce:
+    """Turns a 'touching now?' signal into hit events: True once when a touch
+    begins, then not again until it has been clear for clear_s (so one bump
+    that chatters on and off counts once)."""
+
+    def __init__(self, clear_s: float):
+        self.clear_s = clear_s
+        self.touching = False
+        self.clear_since: float | None = None
+
+    def update(self, touching_now: bool, now: float) -> bool:
+        if touching_now:
+            new = not self.touching
+            self.touching, self.clear_since = True, None
+            return new
+        if self.touching and self.clear_since is None:
+            self.clear_since = now
+        elif self.touching and now - self.clear_since >= self.clear_s:
+            self.touching = False
+        return False
 
 
 def site_id(model, name: str) -> int:

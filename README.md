@@ -30,6 +30,7 @@ uv run demo --env pickup  --controller hands_v2 --imu fake       # rehearse, no 
 | `--imu` | `ximu` (default: the real x-IMU3s), `fake` (two still synthetic IMUs) |
 | `--imu-ip IP0 IP1` | default `192.168.0.161 192.168.0.102` (ximu-api's). IMU 0 first |
 | `--who LABEL` | written into the CSV |
+| `--leaderboard PATH` | feeding high scores (default `runs/leaderboard.json`) |
 | `--mobility FILE`, `--shoulder left/right` | `head` only: per-user ranges (mujoco-sim's `--calibrate-rom` profiles load as-is) |
 
 While it runs, the operator types into the terminal (letter, then Enter):
@@ -37,13 +38,20 @@ While it runs, the operator types into the terminal (letter, then Enter):
 | key | does |
 | --- | --- |
 | `c` | recalibrate neutral (the visitor holds still ~2 s) |
-| `r` | reset the task (bottle back on the floor, door closed, bite restarted) |
+| `r` | reset the task (feeding: play another round; bottle back on the floor; door closed) |
 | `n` | next visitor: robot and task reset, scores cleared, recalibrate |
 | `q` | quit (closing the viewer also quits) |
 
 The viewer shows the task, what to do next, live time and scores (top left),
 plus the controller's state and each IMU's sample rate (bottom left). If an IMU
 drops out, the robot holds still and the overlay names the silent IMU.
+
+### The feeding game
+
+- **Round:** 5 attempts. An attempt is one scoop that ends in a bite or a face poke. Dipping again mid-carry doesn't use one up.
+- **Points:** +100 per bite delivered; −50 each time the robot or the spoon (outside the mouth box) touches the face. One bump counts once, and re-arms after 0.5 s clear. The table also blocks the robot but costs nothing. Scores can go below zero.
+- **Time:** from the end of calibration to the end of the 5th attempt.
+- **Leaderboard:** after the round, the terminal asks for initials (up to 3; Enter alone skips). While it waits, the typed line is always taken as initials, so "Q" or "N" won't quit or reset. Boards are per controller, top 5 shown, best score first and faster time breaking ties. Every round is kept in `runs/leaderboard.json`, which survives restarts. Delete the file to clear the board.
 
 ## Where the IMUs go
 
@@ -91,7 +99,7 @@ calibration time is never counted.
 
 | `--env` | the task | each trial records |
 | --- | --- | --- |
-| `feeding` | The gripper holds a spoon (it stays closed and gripper gestures do nothing). Dip it in the plate, then bring the bite to the seated person's mouth (green box). Touching the face outside the box is a miss. | `time_s` plate→mouth; `error_cm`, the closest approach to the mouth centre during a 1 s hold (accuracy); `path_efficiency` (straight line ÷ path travelled) |
+| `feeding` | A game of 5 bites. The gripper holds a spoon (it stays closed and gripper gestures do nothing). Dip it in the plate, then bring the bite to the seated person's mouth (green box): +100. Touching the face (robot or spoon tip, outside the box) costs −50; a spoon that pokes the face ends that attempt as a miss. After 5 attempts the score and time show, the operator types initials, and the score goes on the leaderboard (top right). | per attempt: `round`, `attempt`, `points`, `face_hits`, `time_s` plate→mouth, `error_cm` (closest approach to the mouth centre during a 1 s hold), `path_efficiency` (straight line ÷ path travelled) |
 | `pickup` | A bottle lies on the floor in front of the robot. Pick it up, strafe over to the side table on the left, and set it down in the green zone. It reappears on the floor 2.5 s later. | `grasp_s`, `place_s`, `drops` |
 | `door` | Grab the handle and pull the door open past 34°. That means retracting the arm while strafing right, following the handle's arc. The wrist starts pre-rolled 90° to fit the horizontal lever. | `touch_s` (first handle contact), `open_s`, `peak_deg` |
 
@@ -116,7 +124,7 @@ confirm each is physically doable and gets scored.
 
 ## Before the event
 
-1. `uv run pytest`: 69 tests, a few seconds. They cover scenes, scoring, every controller, and the complexity rule.
+1. `uv run pytest`: 81 tests, a few seconds. They cover scenes, scoring, every controller, and the complexity rule.
 2. Rehearse each combination you'll show with `--imu fake`.
 3. Put the laptop on the IMUs' network and power them on. `uv run demo ...`
    prints each connection, and the IMUs blink when connected.

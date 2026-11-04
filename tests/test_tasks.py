@@ -8,7 +8,9 @@ import pytest
 
 from conftest import Scripted, harness_for
 from stretch_demo.sim.robot import GRASP_BODY
-from stretch_demo.tasks.feeding import DWELL_S
+from stretch_demo.tasks.base import ContactDebounce, touching
+from stretch_demo.tasks.feeding import ATTEMPTS, BITE_POINTS, DWELL_S, FACE_PENALTY
+from stretch_demo.tasks.leaderboard import Leaderboard
 from stretch_demo.tasks.log import TrialLog
 
 TASKS = ("feeding", "pickup", "door")
@@ -97,6 +99,83 @@ def test_feeding_needs_a_scoop_first_and_redip_restarts():
     t = feed_steps(harness, [plate, (plate + mouth) / 2])
     feed_steps(harness, [plate], t0=t + 5.0)
     assert harness.task._carry["t0"] == pytest.approx(t + 5.0)
+
+
+# --- the 5-bite round, points and leaderboard ---
+
+def bite(harness, plate, mouth, t0):
+    """One successful attempt (scoop, carry, hold in the mouth); returns the time after."""
+    return feed_steps(harness, [plate, (plate + mouth) / 2] + [mouth] * int(DWELL_S / 0.1 + 2), t0=t0)
+
+
+def test_round_of_five_scores_bites_and_face_touches(tmp_path):
+    harness, plate, mouth = feeding()
+    task = harness.task
+    task.leaderboard = Leaderboard(tmp_path / "board.json", "head")
+    forehead = mouth + [0.05, 0.0, 0.08]
+    t = 0.0
+    for _ in range(3):
+        t = bite(harness, plate, mouth, t)
+    t = feed_steps(harness, [plate, forehead, plate + [0, 0, 0.2]], t0=t)  # poke the face: a miss
+    assert task.attempts == 4 and task.score == 3 * BITE_POINTS - FACE_PENALTY
+    t = bite(harness, plate, mouth, t)
+    assert task.round_over and task.awaiting_initials()
+    assert task.score == 4 * BITE_POINTS - FACE_PENALTY
+    assert sum(trial["points"] for trial in task.trials) == task.score
+    assert task.round_time(t) == pytest.approx(t - 0.1, abs=0.15)
+    feed_steps(harness, [plate, (plate + mouth) / 2], t0=t)  # after the round: nothing counts
+    assert task.attempts == ATTEMPTS
+    task.submit_initials("abc")
+    assert task.rank == 1 and not task.awaiting_initials()
+    assert task.board_rows()[1][0] == "1. ABC"
+
+
+def test_face_touch_while_scooping_costs_points_but_not_an_attempt():
+    harness, plate, mouth = feeding()
+    forehead = mouth + [0.05, 0.0, 0.08]
+    feed_steps(harness, [forehead, forehead, forehead])  # one continuous touch
+    task = harness.task
+    assert task.face_hits == 1 and task.score == -FACE_PENALTY and task.attempts == 0
+    feed_steps(harness, [plate] * 8 + [forehead], t0=1.0)  # cleared >0.5 s, then touches again
+    assert task.face_hits == 2
+
+
+def test_play_again_starts_a_new_round():
+    harness, plate, mouth = feeding()
+    task = harness.task
+    bite(harness, plate, mouth, 0.0)
+    task.reset_objects(harness.model, harness.data)
+    assert task.round == 2 and task.score == 0 and task.attempts == 0 and len(task.trials) == 1
+
+
+def test_contact_debounce_counts_one_bump_once():
+    debounce = ContactDebounce(0.5)
+    hits = [debounce.update(touch, t / 10) for t, touch in enumerate([1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1])]
+    assert hits.count(True) == 2 and hits[0] and hits[-1]
+
+
+def test_robot_bumping_the_head_costs_points():
+    run = Scripted(harness_for("feeding"))
+    lift_to_tip_height(run, run.d.site("mouth_box").xpos[2])
+    run.ramp("wrist_yaw", 0.19, rate=0.5)  # lined up with the face, as for a bite
+    run.ramp("arm", 0.52, rate=0.2)        # then far too far: the gripper runs into it
+    run.go(0.5)
+    task = run.h.task
+    assert touching(run.m, run.d, task.head, task.is_robot)  # the robot itself, not just the spoon
+    assert task.face_hits >= 1 and task.score < 0
+
+
+def test_initials_go_to_the_task_not_the_command_parser(tmp_path):
+    harness = harness_for("feeding")
+    task = harness.task
+    task.bind(harness.model, harness.data)
+    task.leaderboard = Leaderboard(tmp_path / "board.json", "head")
+    task.attempts = ATTEMPTS
+    task.round_start, task.round_end, task._awaiting = 0.0, 60.0, True
+    harness._handle("Q", controller=None, log=None)  # initials, not quit
+    assert not harness.quit and task.leaderboard.entries()[0]["initials"] == "Q"
+    harness._handle("q", controller=None, log=None)
+    assert harness.quit
 
 
 # --- physically doable ---

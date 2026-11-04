@@ -49,6 +49,7 @@ def harness_for(task_name: str) -> SimHarness:
     import mujoco
     mujoco.mj_forward(harness.model, harness.data)
     harness.task.__init__()
+    harness.quit = False
     return harness
 
 
