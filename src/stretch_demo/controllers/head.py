@@ -3,21 +3,25 @@ movement (high cervical SCI). imu 0 on the head, imu 1 on top of one shoulder
 (--shoulder, default right).
 
   head pitch (nod)           -> lift velocity: nod down = lower, back = raise
-  head yaw (turn)            -> wrist yaw velocity ...
-  head yaw past ~60 deg      -> ... and instead the base strafes that way
-  head roll (ear to shoulder)-> wrist pitch velocity
+  head roll (ear to shoulder)-> base strafes that way: tilt left = robot moves left
+  head yaw (turn)            -> wrist yaw velocity
   shoulder forward / back    -> arm extend / retract velocity
   double shrug               -> gripper open / close
-  (wrist roll stays put)
+  (wrist pitch and roll stay where the task put them)
 
-Why this layout (chosen 2026-11-02): the shrug only works one way from a
-relaxed seated position, so it can't drive the lift up AND down; as a binary
-input (the gyro double shrug that worked on hardware) it's reliable. That
-leaves the head to drive the lift, the wrist and -- past a big turn -- the base.
+Why this layout (2026-11-04, replacing head yaw past 60 deg -> base and head roll
+-> wrist pitch): strafing by turning the head 60 deg took the visitor's eyes off
+the screen exactly while the robot moved, and ear-to-shoulder -> wrist pitch
+didn't feel natural. A head tilt strafes with the eyes still on the screen, in
+the direction of the tilt (every task camera looks along the arm, so the robot's
+left is the screen's left). No task needs wrist pitch: each is done with the
+wrist level. The shrug stays a binary input (the gyro double shrug that worked
+on hardware): from a relaxed seated position it only works one way, so it can't
+drive anything up AND down.
 
 Every range, speed and sign is in MobilitySettings (--mobility FILE; mujoco-sim's
---calibrate-rom profiles load as-is). Untested on hardware: the head-pitch->lift
-sign (head_lift_sign), head-yaw->base (base_yaw_sign).
+--calibrate-rom profiles load as-is). head_lift_sign was flipped after the first
+hardware try (nod down raised the lift); base_roll_sign is untested on hardware.
 """
 from stretch_demo.controllers.base import ImuController, drives_text
 from stretch_demo.tracking.gestures import DoubleShrug
@@ -48,17 +52,16 @@ class HeadController(ImuController):
         angles = self._angles(frames, dt)
         self._gestures(frames[SHOULDER].gyro, now)
         levels = {name: self._level(name, angle) for name, angle in angles.items()}
-        base = self._base_level(angles["head_yaw"])
         drive = {
-            "lift": -levels["head_pitch"] * s.head_lift_sign,  # flexion (nod down) lowers
-            "wrist_pitch": levels["head_roll"] * s.wrist_pitch_sign,
-            "wrist_yaw": 0.0 if base else levels["head_yaw"],
+            "lift": -levels["head_pitch"] * s.head_lift_sign,
+            "wrist_yaw": levels["head_yaw"],
             "arm": levels["shoulder_protraction"] * s.arm_sign,
         }
         for joint, level in drive.items():
             self.setpoints.step(joint, level * s.max_rate[joint] * dt)
+        base = levels["head_roll"] * s.base_roll_sign  # + = tilt left = robot's left
         self.drives = {**drive, "base": base}
-        return base * s.base_yaw_sign
+        return base
 
     def _angles(self, frames: dict, dt: float) -> dict[str, float]:
         """Each motion's signed angle (+ = its pos_name direction), from both IMUs
@@ -74,11 +77,6 @@ class HeadController(ImuController):
         s = self.settings
         rom = s.motions()[name].rom(angle)
         return shape(angle, s.deadband_frac * rom, s.full_frac * rom, s.expo)
-
-    def _base_level(self, yaw: float) -> float:
-        s = self.settings
-        rom = s.head_yaw.rom(yaw)
-        return shape(yaw, s.base_yaw_start_frac * rom, s.base_yaw_full_frac * rom)
 
     def _gestures(self, gyro, now: float) -> None:
         """A double shrug toggles the gripper; a near miss prints why."""

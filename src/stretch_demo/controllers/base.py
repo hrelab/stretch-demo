@@ -19,6 +19,7 @@ import time
 
 import numpy as np
 
+from stretch_demo.controllers.limits import JointWatch, limits_text
 from stretch_demo.sim.base_drive import OmniDrive
 from stretch_demo.tracking.imu_tracker import ImuTracker, NeutralCalibration
 from stretch_demo.tracking.shaping import Setpoints
@@ -63,6 +64,7 @@ class ImuController:
         self.calibration = NeutralCalibration(self.trackers)
         self.calibrating = True
         self._message = ""
+        self.limits = ""  # which joints won't move further, for the overlay
         self.clock = time.monotonic  # replaceable in tests
 
     # --- harness interface ---
@@ -78,6 +80,7 @@ class ImuController:
         start_closed = abs(data.ctrl[g] - self.lo[g]) < abs(data.ctrl[g] - self.hi[g])
         self.gripper = Gripper(self.lo[g], self.hi[g], self.gripper_enabled, start_closed)
         self.base = OmniDrive(model, data, act)
+        self.watch = JointWatch(act)
         self._template = data.ctrl.copy()  # head and anything else nobody drives
         self.on_setup()
         self.recalibrate()
@@ -85,6 +88,7 @@ class ImuController:
     def recalibrate(self) -> None:
         self.calibration.restart()
         self.calibrating = True
+        self.limits = ""
         print("Calibrating: the visitor holds a comfortable neutral pose, still, for ~2 s.")
 
     def get_ctrl(self, model, data):
@@ -96,7 +100,9 @@ class ImuController:
         if frames is None:
             return self.compose(0.0)
         self._message = ""
-        return self.compose(self.control(frames, self.dt, now))
+        ctrl = self.compose(self.control(frames, self.dt, now))
+        self.limits = limits_text(self.watch.check(self.setpoints, data, now))
+        return ctrl
 
     def status(self) -> str:
         return self._message or self.describe()
@@ -130,6 +136,7 @@ class ImuController:
     def _calibrate(self, batches: dict, now: float) -> np.ndarray:
         if self.calibration.step(batches, now):
             self.calibrating = False
+            self.watch.reset()
             self.on_setup()
             self._message = ""
             print(f"Calibrated. {self.name} is live.")

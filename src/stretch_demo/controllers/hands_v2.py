@@ -5,6 +5,10 @@ speeds of bio_m2_v2.
   hand 1 pitch / roll        -> wrist pitch / roll velocity
   hand 1 yaw                 -> wrist yaw velocity ...
   hand 1 yaw past 40 deg     -> ... and instead the base strafes that way (full at 70)
+                                (yaw only counts with hand 1's pitch and roll under
+                                YAW_LEVEL: tilting and rolling together reads as
+                                yaw, ~18 deg for 25 + 45, and at a rate that keeps
+                                spinning the wrist; seen hands-on 2026-11-04)
   hand 2 pitch (tip up/down) -> lift velocity
   hand 2 forearm twist       -> arm extend velocity
   hand 2 quick yaw flick     -> gripper open / close
@@ -39,6 +43,7 @@ RATE_DEADBAND = np.deg2rad(8.0)
 FULL_TILT = np.deg2rad(35.0)
 EXPO = 0.6
 
+YAW_LEVEL = np.deg2rad(20.0)
 BASE_YAW_START = np.deg2rad(40.0)
 BASE_YAW_FULL = np.deg2rad(70.0)
 
@@ -62,6 +67,8 @@ class HandsV2Controller(ImuController):
         roll2, pitch2, _ = frames[HAND2].angles
         roll1, roll2 = self.roll1(roll1), self.roll2(roll2)
         yaw1 = self.yaw1.correct(yaw1, dt)
+        if max(abs(pitch1), abs(roll1)) >= YAW_LEVEL:
+            yaw1 = 0.0
         paused = self._gripper_flick(frames[HAND2].gyro, now)
 
         base = shape(WRIST_YAW_SIGN * yaw1, BASE_YAW_START, BASE_YAW_FULL)

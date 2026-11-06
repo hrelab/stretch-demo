@@ -6,14 +6,21 @@ best hands-on. IMUs on the backs of both hands (imu 0 = left, imu 1 = right).
   left hand  yaw past 40 deg -> base strafes that way (full speed at 70 deg)
   right hand pitch           -> lift VELOCITY (tilt to move, neutral to stop)
   right hand forearm twist   -> arm extend VELOCITY
-  right hand yaw past +-25   -> gripper open / close (latched, hysteresis)
+  right hand yaw past +-25   -> gripper open / close (latched, hysteresis),
+                                only while the right hand is otherwise near level
 
 Constants and signs are imu_hands / imu_hands_vel's (see their docstrings in
-mujoco-sim for how each was arrived at), with two demo changes. With the gripper
-off (self-feeding), right-hand yaw does nothing, and the lift/arm freeze that
-protected a gripper gesture is off too. And the wrist pitch sign is flipped:
-mujoco-sim tuned it on a Stretch 3, whose wrist pitch is physically reversed
-relative to the Stretch 4's.
+mujoco-sim for how each was arrived at), with these demo changes:
+- With the gripper off (self-feeding), right-hand yaw does nothing.
+- The wrist pitch sign is flipped: mujoco-sim tuned it on a Stretch 3, whose
+  wrist pitch is physically reversed relative to the Stretch 4's.
+- No lift/arm freeze, and the gripper only latches with the right hand near
+  level. Tilting the hand (lift) and twisting it (arm) at the same time reads as
+  yaw: 25 deg of tilt with 45 deg of twist reads ~18 deg of yaw, 30 + 50 ~24 deg.
+  mujoco-sim froze lift/arm past 15 deg of yaw, so driving both at once kept
+  pausing them (found hands-on, 2026-11-04), and could even toggle the gripper.
+  With tilt and twist both under GRIPPER_LEVEL, the fake yaw stays under ~7 deg,
+  far from the 25 deg gripper threshold.
 """
 import numpy as np
 
@@ -40,7 +47,7 @@ BASE_YAW_FULL = np.deg2rad(70.0)
 
 GRIPPER_CLOSE_YAW = np.deg2rad(-25.0)
 GRIPPER_OPEN_YAW = np.deg2rad(25.0)
-ARM_FREEZE_YAW = np.deg2rad(15.0)  # a gripper gesture is underway: hold lift/arm
+GRIPPER_LEVEL = np.deg2rad(20.0)  # gripper yaw only counts with |pitch|, |roll| under this
 
 
 def latch_gripper(closed: bool, yaw: float) -> bool:
@@ -67,7 +74,6 @@ class HandsVelController(ImuController):
         self.base_yaw = YawDriftBaseline()
         self.grip_yaw = YawDriftBaseline()
         self.drives: dict[str, float] = {}
-        self.frozen = False
 
     def control(self, frames: dict, dt: float, now: float) -> float:
         roll, pitch, yaw = frames[LEFT].angles
@@ -76,9 +82,8 @@ class HandsVelController(ImuController):
 
         g_roll, g_pitch, g_yaw = frames[RIGHT].angles
         grip_yaw = self.grip_yaw.correct(g_yaw, dt)
-        self.frozen = self.gripper.enabled and abs(grip_yaw) >= ARM_FREEZE_YAW
         lift, extend = self._arm(g_pitch, g_roll, dt)
-        if self.gripper.enabled:
+        if self.gripper.enabled and max(abs(g_pitch), abs(g_roll)) < GRIPPER_LEVEL:
             self.gripper.set(latch_gripper(self.gripper.closed, grip_yaw))
         self.drives = {"lift": lift, "arm": extend, "base": base}
         return base
@@ -91,11 +96,8 @@ class HandsVelController(ImuController):
             self.setpoints.set(name, self.ema(name, target))
 
     def _arm(self, pitch: float, roll: float, dt: float) -> tuple[float, float]:
-        if self.frozen:
-            lift = extend = 0.0
-        else:
-            lift = shape(LIFT_SIGN * pitch, RATE_DEADBAND, LIFT_FULL_TILT, EXPO)
-            extend = shape(EXTEND_SIGN * roll, RATE_DEADBAND, EXTEND_FULL_TILT, EXPO)
+        lift = shape(LIFT_SIGN * pitch, RATE_DEADBAND, LIFT_FULL_TILT, EXPO)
+        extend = shape(EXTEND_SIGN * roll, RATE_DEADBAND, EXTEND_FULL_TILT, EXPO)
         # Smooth the RATE, not the position: takes the edge off tremor without
         # delaying a stop.
         self.setpoints.step("lift", self.ema("lift_rate", lift * LIFT_MAX_RATE) * dt)
@@ -104,7 +106,5 @@ class HandsVelController(ImuController):
 
     def describe(self) -> str:
         parts = [drives_text(self.drives)] if any(self.drives.values()) else ["holding"]
-        if self.frozen:
-            parts.append("lift/arm paused (gripper gesture)")
         parts.append(self.gripper.describe())
         return " | ".join(parts)

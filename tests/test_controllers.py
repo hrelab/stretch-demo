@@ -75,9 +75,22 @@ def test_hands_vel_feeding_keeps_spoon_and_ignores_gripper_yaw():
     ctl, _ = make(HandsVelController, task="feeding")
     start = ctl.setpoints["lift"]
     ctrl = drive(ctl, {0: frame(), 1: frame(pitch=-40.0, yaw=-30.0)}, seconds=0.5)
-    assert ctl.gripper.closed and not ctl.frozen
+    assert ctl.gripper.closed
     assert ctl.setpoints["lift"] > start  # no lift freeze: there is no gripper gesture
     assert ctrl[ctl.act["gripper"]] == ctl.gripper.lo
+
+
+def test_hands_vel_tilt_plus_twist_never_pauses_lift_or_arm_or_grips():
+    """Hands-on bug: tilting (lift) while twisting (arm) reads as right-hand yaw."""
+    ctl, harness = make(HandsVelController)
+    from scipy.spatial.transform import Rotation
+    leaked = (Rotation.from_euler("X", 50, degrees=True) * Rotation.from_euler("Y", -30, degrees=True))
+    yaw, pitch, roll = np.rad2deg(leaked.as_euler("ZYX"))
+    assert abs(yaw) > 20  # the fake yaw the old freeze tripped on
+    lift, arm = ctl.setpoints["lift"], ctl.setpoints["arm"]
+    drive(ctl, {0: frame(), 1: frame(roll=roll, pitch=pitch, yaw=yaw)}, seconds=1.0)
+    assert ctl.setpoints["lift"] > lift + 0.01 and ctl.setpoints["arm"] > arm + 0.05  # both kept moving
+    assert not ctl.gripper.closed
 
 
 def test_hands_vel_wrist_is_relative_to_the_task_start_pose():
@@ -112,6 +125,14 @@ def test_hands_v2_hand1_yaw_drives_wrist_then_base():
     assert base_level(ctl) > 0.4
 
 
+def test_hands_v2_tilt_plus_roll_does_not_spin_wrist_yaw_or_base():
+    ctl, _ = make(HandsV2Controller)
+    start = ctl.setpoints["wrist_yaw"]
+    drive(ctl, {0: frame(roll=45.0, pitch=25.0, yaw=18.0), 1: frame()}, seconds=1.0)
+    assert ctl.setpoints["wrist_yaw"] == pytest.approx(start) and base_level(ctl) == 0.0
+    assert ctl.setpoints["wrist_roll"] != pytest.approx(0.0, abs=0.3)  # roll/pitch still drive
+
+
 def test_hands_v2_flick_does_nothing_when_feeding():
     ctl, _ = make(HandsV2Controller, task="feeding")
     drive(ctl, flick_frames(400.0), seconds=0.08)
@@ -122,22 +143,34 @@ def test_hands_v2_flick_does_nothing_when_feeding():
 
 # --- head ---
 
-def test_head_nod_down_lowers_lift():
+def test_head_pitch_drives_lift_with_the_hardware_sign():
+    """On hardware (2026-11-04) the old sign raised the lift on a nod down; that
+    nod reads as + IMU pitch here, so + pitch must now lower it."""
     ctl, _ = make(HeadController)
     start = ctl.setpoints["lift"]
-    drive(ctl, {0: frame(pitch=-30.0), 1: frame()}, seconds=1.0)  # imu pitch - = flexion
-    assert ctl.setpoints["lift"] < start - 0.1
+    drive(ctl, {0: frame(pitch=30.0), 1: frame()}, seconds=1.0)
+    assert ctl.setpoints["lift"] < start - 0.05
+    drive(ctl, {0: frame(pitch=-30.0), 1: frame()}, seconds=2.0)
+    assert ctl.setpoints["lift"] > start  # head back raises
 
 
-def test_head_turn_drives_wrist_then_base_past_60():
+def test_head_tilt_strafes_the_base_and_turn_only_turns_the_wrist():
     ctl, _ = make(HeadController)
-    start = ctl.setpoints["wrist_yaw"]
-    drive(ctl, {0: frame(yaw=40.0), 1: frame()}, seconds=0.5)
-    assert ctl.setpoints["wrist_yaw"] > start + 0.1 and base_level(ctl) == 0.0
-    turned = ctl.setpoints["wrist_yaw"]
-    drive(ctl, {0: frame(yaw=72.0), 1: frame()}, seconds=1.0)
-    assert ctl.setpoints["wrist_yaw"] == pytest.approx(turned, abs=0.02)
+    drive(ctl, {0: frame(roll=25.0), 1: frame()}, seconds=1.0)  # + roll = tilt left
     assert base_level(ctl) > 0.4
+    drive(ctl, {0: frame(roll=-25.0), 1: frame()}, seconds=2.0)
+    assert base_level(ctl) < -0.4
+    start = ctl.setpoints["wrist_yaw"]
+    drive(ctl, {0: frame(yaw=75.0), 1: frame()}, seconds=1.0)  # a big turn: still just the wrist
+    assert ctl.setpoints["wrist_yaw"] > start + 0.5
+    assert abs(base_level(ctl)) < 0.05
+
+
+def test_head_never_moves_wrist_pitch():
+    ctl, _ = make(HeadController)
+    start = ctl.setpoints["wrist_pitch"]
+    drive(ctl, {0: frame(roll=30.0, pitch=30.0, yaw=30.0), 1: frame(roll=10.0)}, seconds=0.5)
+    assert ctl.setpoints["wrist_pitch"] == start
 
 
 def test_head_shoulder_protraction_drives_arm_with_hardware_sign():

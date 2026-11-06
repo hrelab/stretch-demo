@@ -14,7 +14,7 @@ from pathlib import Path
 from stretch_demo.console import HELP, Console
 from stretch_demo.imu.bus import ImuBus
 from stretch_demo.imu.fake_source import FakeSource
-from stretch_demo.imu.ximu_source import DEFAULT_IPS, ImuConnectError, XimuSource
+from stretch_demo.imu.ximu_source import DEFAULT_SERIALS, ImuConnectError, XimuSource
 from stretch_demo.sim.harness import SimHarness
 from stretch_demo.tasks.door import DoorTask
 from stretch_demo.tasks.feeding import FeedingTask
@@ -59,9 +59,12 @@ def parse_args(argv=None) -> argparse.Namespace:
                         help="hands_vel / hands_v2: IMUs on both hands; head: head + shoulder")
     parser.add_argument("--imu", default="ximu", choices=("ximu", "fake"),
                         help="ximu: the real x-IMU3s; fake: two still synthetic IMUs, to rehearse (default: %(default)s)")
-    parser.add_argument("--imu-ip", nargs=2, metavar=("IP0", "IP1"), default=list(DEFAULT_IPS),
-                        help="x-IMU3 addresses, imu 0 then imu 1 (default: %(default)s). hands: left/hand 1 "
-                        "first; head: head first, shoulder second")
+    sensors = parser.add_mutually_exclusive_group()
+    sensors.add_argument("--imu-serial", nargs=2, metavar=("S0", "S1"), default=list(DEFAULT_SERIALS),
+                         help="x-IMU3 serial numbers, imu 0 then imu 1, found on whatever network they're on "
+                         "(default: %(default)s). hands: left/hand 1 first; head: head first, shoulder second")
+    sensors.add_argument("--imu-ip", nargs=2, metavar=("IP0", "IP1"),
+                         help="connect to these addresses instead of looking the serials up, imu 0 first")
     parser.add_argument("--who", default="", help="participant/visitor label written into the CSV")
     parser.add_argument("--leaderboard", default=str(RUNS_DIR / "leaderboard.json"), metavar="PATH",
                         help="high-score file for the feeding rounds (default: %(default)s)")
@@ -74,7 +77,7 @@ def parse_args(argv=None) -> argparse.Namespace:
 def make_source(args, bus):
     if args.imu == "fake":
         return FakeSource(bus)
-    return XimuSource(bus, args.imu_ip)
+    return XimuSource(bus, args.imu_ip, serials=args.imu_serial)
 
 
 def main(argv=None) -> None:

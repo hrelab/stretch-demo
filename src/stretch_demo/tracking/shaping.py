@@ -70,10 +70,12 @@ class Setpoints:
     def __init__(self, initial: dict[str, float], limits: dict[str, tuple[float, float]]):
         self.values = dict(initial)
         self.limits = limits
+        self.pushing: dict[str, int] = {}  # joint -> -1/+1: last write asked past that limit
 
     def set(self, name: str, value: float) -> None:
         lo, hi = self.limits[name]
         self.values[name] = float(np.clip(value, lo, hi))
+        self.pushing[name] = int(value > hi) - int(value < lo)
 
     def step(self, name: str, delta: float) -> None:
         self.set(name, self.values[name] + delta)

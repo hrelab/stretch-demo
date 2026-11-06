@@ -28,7 +28,8 @@ uv run demo --env pickup  --controller hands_v2 --imu fake       # rehearse, no 
 | `--env` | `feeding`, `pickup`, `door` |
 | `--controller` | `hands_vel`, `hands_v2`, `head` |
 | `--imu` | `ximu` (default: the real x-IMU3s), `fake` (two still synthetic IMUs) |
-| `--imu-ip IP0 IP1` | default `192.168.0.161 192.168.0.102` (ximu-api's). IMU 0 first |
+| `--imu-serial S0 S1` | default `6A3409FC 6A32706F` (ximu-api's). IMU 0 first. Found on whatever network they're on |
+| `--imu-ip IP0 IP1` | skip the serial lookup and connect to these addresses. IMU 0 first |
 | `--who LABEL` | written into the CSV |
 | `--leaderboard PATH` | feeding high scores (default `runs/leaderboard.json`) |
 | `--mobility FILE`, `--shoulder left/right` | `head` only: per-user ranges (mujoco-sim's `--calibrate-rom` profiles load as-is) |
@@ -45,6 +46,12 @@ While it runs, the operator types into the terminal (letter, then Enter):
 The viewer shows the task, what to do next, live time and scores (top left),
 plus the controller's state and each IMU's sample rate (bottom left). If an IMU
 drops out, the robot holds still and the overlay names the silent IMU.
+A **STUCK** line appears there when a joint won't move further: "at its limit" (the
+controller is asking for more than the joint's range) or "blocked" (the joint has
+lagged its command for 0.5 s, pressed against the robot, table or floor). Either
+way, the visitor moves that joint back the other way. The Stretch 4's wrist
+ranges are huge (pitch −65° to +245°), so the wrist is usually blocked by
+something long before it reaches a limit.
 
 ### The feeding game
 
@@ -55,7 +62,15 @@ drops out, the robot holds still and the overlay names the silent IMU.
 
 ## Where the IMUs go
 
-IMU 0 is the first `--imu-ip`, IMU 1 the second.
+IMU 0 is the first `--imu-serial` (default `6A3409FC`), IMU 1 the second (`6A32706F`).
+Write each serial on its sensor's case.
+
+The IMUs are found **by serial number**, not IP, so any network works: the lab, a
+phone hotspot or a travel router, with DHCP or static IPs. Every x-IMU3 announces its
+serial and current IP about once a second, and the demo connects to whatever IP each
+serial announces. The laptop just has to be on the same network, and that network must
+pass UDP broadcasts. If one doesn't (some phone hotspots don't), the lookup times out
+after 10 s. In that case pass the IPs the x-IMU3 GUI shows with `--imu-ip`.
 
 | controller | IMU 0 | IMU 1 |
 | --- | --- | --- |
@@ -70,20 +85,20 @@ None of the three switch modes. The same motion always does the same thing.
 - Left hand roll/pitch/yaw sets wrist roll/pitch/yaw 1:1, measured from the task's start pose.
 - Turning the left hand past 40° also strafes the base that way.
 - Right hand pitch sets the lift speed; forearm twist sets the arm extension speed.
-- Right hand yaw past ±25° latches the gripper closed/open.
+- Right hand yaw past ±25° latches the gripper closed/open, but only with the right hand near level (tilt and twist both under 20°). Tilting and twisting together reads as fake yaw, so the gripper ignores yaw then, and lift/arm never pause (mujoco-sim paused them, which made driving both at once impossible).
 
 **`hands_v2`**: mujoco-sim's bio_m2_v2 without its ARM/BASE modes, with the same wrist-pitch flip. Every axis is tilt-to-move.
-- Hand 1 pitch/roll/yaw drive wrist speeds. Past 40° of yaw, the base strafes instead of turning the wrist.
+- Hand 1 pitch/roll/yaw drive wrist speeds. Past 40° of yaw, the base strafes instead of turning the wrist. Yaw only counts while hand 1's pitch and roll are both under 20°, because tilting and rolling together reads as yaw.
 - Hand 2 pitch drives lift; forearm twist drives the arm.
 - A quick hand-2 yaw flick (the gesture that used to switch modes) toggles the gripper.
 
 **`head`**: mujoco-sim's bio_m2_head without modes. It's for users with little hand movement.
-- Nodding moves the lift: nod down = lower.
-- Turning the head turns the wrist. Past ~60° (`base_yaw_start_frac` of the head-yaw range), it strafes the base instead.
-- Tilting the head toward a shoulder pitches the wrist.
+- Nodding moves the lift: nod down = lower, head back = raise.
+- Tilting the head toward a shoulder strafes the base that way, so the eyes stay on the screen.
+- Turning the head turns the wrist (only the wrist, however far).
 - Shoulder forward/back extends/retracts the arm.
 - A double shrug toggles the gripper.
-- Wrist roll stays where the task put it.
+- Wrist pitch and roll stay where the task put them. Every task is doable with them there.
 
 All ranges and signs are in `MobilitySettings` (`src/stretch_demo/tracking/mobility.py`, editable via a `--mobility` JSON). Its defaults include the signs the Stretch 4 needed in the bio_m2_head hardware sessions.
 
@@ -124,26 +139,32 @@ confirm each is physically doable and gets scored.
 
 ## Before the event
 
-1. `uv run pytest`: 81 tests, a few seconds. They cover scenes, scoring, every controller, and the complexity rule.
+1. `uv run pytest`: 99 tests, a few seconds. They cover scenes, scoring, every controller, and the complexity rule.
 2. Rehearse each combination you'll show with `--imu fake`.
 3. Put the laptop on the IMUs' network and power them on. `uv run demo ...`
    prints each connection, and the IMUs blink when connected.
 4. Check the overlay shows ~400 Hz per IMU.
 5. Have the visitor sit relaxed while calibration runs.
 
-**Not yet tried on hardware:** the head controller's new head-pitch→lift and
-head-yaw→base directions (flip `head_lift_sign` / `base_yaw_sign` in a
-`--mobility` JSON if either goes backwards), the hands controllers' flipped
-wrist pitch, and the PyPI ximu3 1.9.1 with the lab's devices. If 1.9.1
-misbehaves, pin `ximu3==1.8.1` in `pyproject.toml`.
+**Not yet tried on hardware:** the head controller's head-tilt→base direction
+(flip `base_roll_sign` in a `--mobility` JSON if the robot goes the other way),
+the hands controllers' flipped wrist pitch, and the PyPI ximu3 1.9.1 with the
+lab's devices. If 1.9.1 misbehaves, pin `ximu3==1.8.1` in `pyproject.toml`.
 
 ## Troubleshooting
 
-- **`IMU setup failed: could not connect to imu N at <ip>`**: the IMU is off,
-  on another network, or has another IP. Fix `--imu-ip`, or use `--imu fake`.
+- **`IMU setup failed: not found on the network: <serial>`**: that IMU didn't
+  announce itself within 10 s. It's off, on another network, or the network
+  blocks broadcasts. The message lists every x-IMU3 it *did* see, with IPs. If the
+  missing one is there under another serial, fix `--imu-serial`. If nothing is seen
+  but the x-IMU3 GUI connects, use `--imu-ip`. Otherwise use `--imu fake`.
+- **`IMU setup failed: could not connect to imu N at <ip>`**: it was found (or
+  given by `--imu-ip`) but wouldn't open. Check it's on and not connected to
+  another program, such as the x-IMU3 GUI or a running ximu-api.
 - **Stuck on "HOLD STILL -- calibrating"**: every IMU must stay within 2° for
   2 s. Right after power-on the x-IMU3 heading can still be swinging, so wait,
   or type `c` to restart calibration.
+- **The wrist or base drifts by itself**: the trackers take heading from the gyros, not the x-IMU3's own orientation, whose magnetometer correction was seen swinging heading ~28° with the IMUs lying still. What's left is gyro drift of about 1°/min. If something still creeps, type `c` to recalibrate.
 - **"NO DATA from ..."**: an IMU dropped out (>0.5 s silent). The robot holds
   still until it's back.
 - **A direction is backwards**: hands controllers: the sign constants at the top of

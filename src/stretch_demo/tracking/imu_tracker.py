@@ -8,6 +8,17 @@ hand-velocity integration ('p' inputs) is gone.
 Calibration never blocks: controllers feed it a batch per tick, so the viewer
 stays live and shows "hold still" while it runs, and it can be rerun (new
 visitor) from the terminal at any time.
+
+Heading comes from the gyros, not the x-IMU3's own orientation. Its fusion
+pulls heading toward the magnetometer, and with the IMUs lying still on a desk
+it was seen (2026-11-04) swinging heading 28 deg over ~4 s, seconds AFTER
+calibration had locked, while the gyros read ~0.3 deg/s. On a tilted IMU that
+heading swing also shows up as roll/pitch, and rate controllers (hands_v2) turn
+any such offset into a joint that keeps moving. So after calibration the tracker
+integrates the bias-removed gyro for orientation and, every update, snaps only
+its TILT to the device's (gravity-referenced, trustworthy); heading is left to
+the gyro. What's left is slow gyro-bias drift, which the controllers' leaky yaw
+baselines already absorb.
 """
 from dataclasses import dataclass
 
@@ -22,6 +33,8 @@ SETTLE_WINDOW_S = 2.0
 SETTLE_TOL = np.deg2rad(2.0)
 # ZYX Euler is singular at pitch = +-90 deg; clamp short of it.
 PITCH_GUARD = np.deg2rad(85.0)
+UP = np.array([0.0, 0.0, 1.0])  # earth frame
+MAX_GYRO_DT = 0.05  # s: a longer gap between samples (dropout) isn't integrated across
 
 
 def latest_quaternion(batch) -> Rotation | None:
@@ -42,6 +55,30 @@ def settle_spread(samples: list, now: float) -> float | None:
     return float(np.max((rots.mean().inv() * rots).magnitude()))
 
 
+def integrate_gyro(rot: Rotation, samples: list, prev_ts: int | None, bias: np.ndarray) -> Rotation:
+    """Advance `rot` (sensor -> earth) by body-frame gyro samples (deg/s, device
+    timestamps in us); prev_ts is the sample before the first one, if any."""
+    for sample in samples:
+        if prev_ts is not None:
+            dt = min((sample.timestamp - prev_ts) * 1e-6, MAX_GYRO_DT)
+            if dt > 0:
+                rot = rot * Rotation.from_rotvec((np.deg2rad(sample.gyroscope) - bias) * dt)
+        prev_ts = sample.timestamp
+    return rot
+
+
+def with_tilt_of(rot: Rotation, device: Rotation) -> Rotation:
+    """`rot` turned by the smallest rotation (about a horizontal axis, so heading
+    is kept) that gives it the same down direction as `device`."""
+    have, want = rot.inv().apply(UP), device.inv().apply(UP)
+    axis = np.cross(have, want)
+    sin = float(np.linalg.norm(axis))
+    if sin < 1e-9:
+        return rot
+    angle = np.arctan2(sin, float(np.dot(have, want)))
+    return rot * Rotation.from_rotvec(axis / sin * angle).inv()
+
+
 @dataclass
 class ImuFrame:
     angles: np.ndarray  # (roll, pitch, yaw) from neutral, rad
@@ -52,6 +89,7 @@ class ImuTracker:
     def __init__(self, label: str):
         self.label = label
         self.ref: Rotation | None = None
+        self.orientation: Rotation | None = None  # gyro heading + device tilt, sensor -> earth
         self.gyro_bias = np.zeros(3)
         self.gyro = np.zeros(3)
         self._last_ts: int | None = None
@@ -85,6 +123,7 @@ class ImuTracker:
         if spread is None or spread > SETTLE_TOL or not self._calib_gyro:
             return False
         self.ref = Rotation.concatenate([rot for _, rot in self._calib]).mean()
+        self.orientation = self.ref
         self.gyro_bias = np.mean([g for _, g in self._calib_gyro], axis=0)
         return True
 
@@ -92,8 +131,11 @@ class ImuTracker:
         rot = latest_quaternion(batch)
         if rot is None or self.ref is None:
             return None
-        self._update_gyro(self._new_inertial(batch))
-        yaw, pitch, roll = (self.ref.inv() * rot).as_euler("ZYX")
+        prev_ts = self._last_ts
+        new = self._new_inertial(batch)
+        self._update_gyro(new)
+        self.orientation = with_tilt_of(integrate_gyro(self.orientation, new, prev_ts, self.gyro_bias), rot)
+        yaw, pitch, roll = (self.ref.inv() * self.orientation).as_euler("ZYX")
         pitch = float(np.clip(pitch, -PITCH_GUARD, PITCH_GUARD))
         return ImuFrame(np.array([roll, pitch, yaw]), self.gyro.copy())
 

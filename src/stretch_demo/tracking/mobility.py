@@ -11,12 +11,12 @@ Stretch 4 hardware (2026-10-21/28; its ROBOT_DEFAULTS["stretch4"]) are built in.
 Trust them over sim reasoning.
 
 Added for the demo's no-mode mapping (all editable in a profile JSON):
-  head_lift_sign       head pitch now drives the LIFT (nod down = lower). Separate
+  head_lift_sign       head pitch drives the LIFT. -1 = nod down lowers, set after
+                       the first hardware try (2026-11-04: +1 raised it). Separate
                        from lift_sign, which was measured for the shoulder driving it.
-  base_yaw_start_frac  head yaw past this fraction of the head-yaw ROM drives the
-  base_yaw_full_frac   base instead of the wrist; full base speed at the second.
-                       0.75 of the default 80 deg ROM = 60 deg.
-  base_yaw_sign        flip if turning the head drives the base the wrong way.
+  base_roll_sign       head roll (ear to shoulder) strafes the base; +1 = tilting
+                       left moves the robot left. Untested on hardware: flip it if
+                       the robot goes the other way.
 """
 import json
 from dataclasses import asdict, dataclass, field, fields
@@ -109,17 +109,15 @@ class MobilitySettings:
     max_rate: dict = field(default_factory=_max_rate)
     lift_sign: float = -1.0          # mujoco-sim: shoulder -> lift (unused here)
     arm_sign: float = -1.0           # shoulder protraction -> arm (hardware)
-    wrist_pitch_sign: float = -1.0   # head roll -> wrist pitch (hardware)
+    wrist_pitch_sign: float = -1.0   # mujoco-sim: head roll -> wrist pitch (unused here)
     base_forward_sign: float = -1.0  # mujoco-sim BASE mode (unused here)
     base_turn_sign: float = +1.0     # mujoco-sim BASE mode (unused here)
     base_turn_fraction: float = 0.5  # unused here
     gripper_closed_is_hi: bool = False
     gestures: GestureSettings = field(default_factory=GestureSettings)
 
-    head_lift_sign: float = +1.0
-    base_yaw_start_frac: float = 0.75
-    base_yaw_full_frac: float = 0.95
-    base_yaw_sign: float = +1.0
+    head_lift_sign: float = -1.0
+    base_roll_sign: float = +1.0
 
     def shoulder_motion(self, name: str) -> Motion:
         """Shoulder motions mirrored for the left side (roll and yaw flip)."""
@@ -179,8 +177,6 @@ def _validate_motions(s: MobilitySettings) -> None:
 def _validate_fractions(s: MobilitySettings) -> None:
     if not 0 <= s.deadband_frac < s.full_frac <= 1:
         raise ValueError("need 0 <= deadband_frac < full_frac <= 1")
-    if not s.full_frac <= s.base_yaw_start_frac < s.base_yaw_full_frac <= 1.5:
-        raise ValueError("need full_frac <= base_yaw_start_frac < base_yaw_full_frac <= 1.5")
 
 
 def _validate_gestures(g: GestureSettings) -> None:

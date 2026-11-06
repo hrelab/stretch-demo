@@ -172,6 +172,8 @@ class SimHarness:
             return
         self._next_overlay = now + OVERLAY_EVERY_S
         status = [("controller", controller.name), ("", controller.status()), ("IMUs", imu_health(bus))]
+        if controller.limits:
+            status.insert(2, ("STUCK", controller.limits))
         boxes = [
             _text_box(mujoco.mjtGridPos.mjGRID_TOPLEFT, self.task.overlay(now)),
             _text_box(mujoco.mjtGridPos.mjGRID_BOTTOMLEFT, status),

@@ -5,16 +5,21 @@ Redis after it) replaced by ImuBus.publish. Same devices, commands, callbacks an
 100 Hz drain loop; the loop runs on a daemon thread so the sim owns the main
 thread.
 
+Sensors are found by serial number by default (see imu/discovery.py), so their
+IPs can be anything; pass ips to connect to fixed addresses instead.
+
 ximu3 is imported lazily so `--imu fake` runs without the SDK installed.
 """
 import threading
 import time
 
+from stretch_demo.imu import discovery
 from stretch_demo.imu.bus import ImuBus
 from stretch_demo.imu.types import ImuBatch, InertialSample, MagnetometerSample, QuaternionSample
 
-DEFAULT_IPS = ("192.168.0.161", "192.168.0.102")  # ximu-api's SENSOR_IPS: imu 0, imu 1
-SENSOR_PORT = 7000
+DEFAULT_SERIALS = ("6A3409FC", "6A32706F")  # ximu-api's SENSOR_SERIALS: imu 0, imu 1
+DISCOVERY_TIMEOUT_S = 10.0
+SENSOR_PORT = 7000  # with fixed ips; a looked-up sensor uses the port it announces
 EMIT_HZ = 100
 STARTUP_COMMANDS = ['{"colour":null}', '{"strobe":null}']  # blink: "this one is connected"
 
@@ -79,9 +84,11 @@ class SensorState:
 
 
 class XimuSource:
-    def __init__(self, bus: ImuBus, ips=DEFAULT_IPS, port: int = SENSOR_PORT, hz: float = EMIT_HZ):
+    def __init__(self, bus: ImuBus, ips=None, port: int = SENSOR_PORT, hz: float = EMIT_HZ,
+                 serials=DEFAULT_SERIALS):
         self.bus = bus
-        self.ips = tuple(ips)
+        self.ips = tuple(ips) if ips else None  # None: look the serials up
+        self.serials = tuple(serials)
         self.port = port
         self.period = 1.0 / hz
         self.sensors: list[SensorState] = []
@@ -89,31 +96,50 @@ class XimuSource:
         self._thread: threading.Thread | None = None
 
     def describe(self) -> str:
-        return ", ".join(f"imu {i} = {ip}" for i, ip in enumerate(self.ips))
+        if self.ips:
+            return ", ".join(f"imu {i} = {ip}" for i, ip in enumerate(self.ips))
+        return ", ".join(f"imu {i} = serial {serial}" for i, serial in enumerate(self.serials))
 
     def start(self) -> None:
         """Connect every sensor (blocking, with the SDK's own retries), blink it,
         register the callbacks and start draining. All or nothing: on a failed
         connection the ones already open are closed and ImuConnectError says which."""
         ximu3 = _import_ximu3()
-        for index, ip in enumerate(self.ips):
-            self._connect(ximu3, index, ip)
+        for index, (ip, port) in enumerate(self._endpoints(ximu3)):
+            self._connect(ximu3, index, ip, port)
         for sensor in self.sensors:
             sensor.connection.send_commands(STARTUP_COMMANDS)
             sensor.register()
         self._thread = threading.Thread(target=self._loop, name="ximu-drain", daemon=True)
         self._thread.start()
 
-    def _connect(self, ximu3, index: int, ip: str) -> None:
-        print(f"Connecting to x-IMU3 {ip}:{self.port} as imu {index} ...", flush=True)
-        connection = ximu3.Connection(ximu3.TcpConnectionConfig(ip, self.port))
+    def _endpoints(self, ximu3) -> list[tuple[str, int]]:
+        """(ip, port) per sensor, imu 0 first: the fixed ips, or each serial's
+        announced address."""
+        if self.ips:
+            return [(ip, self.port) for ip in self.ips]
+        print(f"Looking for x-IMU3 serial(s) {', '.join(self.serials)} "
+              f"(up to {DISCOVERY_TIMEOUT_S:.0f} s) ...", flush=True)
+        try:
+            found = discovery.discover(self.serials, DISCOVERY_TIMEOUT_S,
+                                       ximu3.NetworkAnnouncement().get_messages)
+        except LookupError as error:
+            raise ImuConnectError(
+                f"{error}\nAre they on, and on the same network as this computer? "
+                "(--imu-serial for other sensors, --imu-ip to skip the lookup, or rehearse with --imu fake)"
+            ) from error
+        return [(e.ip, e.port) for e in found]
+
+    def _connect(self, ximu3, index: int, ip: str, port: int) -> None:
+        print(f"Connecting to x-IMU3 {ip}:{port} as imu {index} ...", flush=True)
+        connection = ximu3.Connection(ximu3.TcpConnectionConfig(ip, port))
         try:
             connection.open()
         except RuntimeError as error:
             self._close_all()
             raise ImuConnectError(
-                f"could not connect to imu {index} at {ip}:{self.port} ({error}). Is it on, "
-                "on this network, and is the IP right? (--imu-ip; or rehearse with --imu fake)"
+                f"could not connect to imu {index} at {ip}:{port} ({error}). Is it on, "
+                "and on this network? (--imu-serial / --imu-ip; or rehearse with --imu fake)"
             ) from error
         self.sensors.append(SensorState(connection, index, ip))
         print(f"  connected: imu {index} ({ip}) -- it should be blinking", flush=True)

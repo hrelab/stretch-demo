@@ -43,13 +43,13 @@ def test_setpoints_clamp_to_limits_and_ema_smooths():
 def test_mujoco_sim_profiles_load_unchanged(profile):
     settings = MobilitySettings.load(profile)
     assert settings.head_yaw.pos_deg > 0
-    assert settings.base_yaw_start_frac == 0.75  # demo field, absent from the file: default
+    assert settings.base_roll_sign == 1.0  # demo field, absent from the file: default
 
 
 def test_defaults_carry_the_stretch4_hardware_signs():
     s = MobilitySettings()
     assert s.wrist_pitch_sign == -1.0 and s.arm_sign == -1.0 and s.gestures.hold_direction == "down"
-    assert s.head_lift_sign == 1.0  # head->lift is new: not inherited from the shoulder flip
+    assert s.head_lift_sign == -1.0  # head->lift: from its own hardware try, not the shoulder's
 
 
 def test_update_is_all_or_nothing():

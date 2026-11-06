@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from scipy.spatial.transform import Rotation
 
 from stretch_demo.imu.bus import ImuBus
 from stretch_demo.imu.types import ImuBatch, InertialSample, QuaternionSample
@@ -90,6 +91,38 @@ def test_tracker_gyro_is_bias_removed_peak(fake_imus, clock):
     gyro = np.rad2deg(trackers[1].update(bus.latest(1)).gyro)
     assert gyro[2] == pytest.approx(300.0, rel=0.02)
     assert abs(gyro[0]) < 1 and abs(gyro[1]) < 1
+
+
+def test_device_heading_swing_with_still_gyros_is_ignored(fake_imus, clock):
+    """Seen on the real x-IMU3s: the device's heading swung 28 deg (and showed as
+    roll on a tilted IMU) while the gyros read ~0. Only gyro-backed motion counts."""
+    bus, source = fake_imus
+    source.set_pose(0, 0.0, 70.0, 0.0)  # worn tilted, so heading leaks into roll
+    trackers = {0: ImuTracker("a"), 1: ImuTracker("b")}
+    assert _calibrate(source, bus, clock, trackers)
+    swung = Rotation.from_euler("z", 28, degrees=True) * Rotation.from_euler("ZYX", [0, 70, 0], degrees=True)
+    batch = bus.latest(0)
+    q = tuple(swung.as_quat(scalar_first=True))
+    still = [InertialSample(s.timestamp + 10_000_000, s.acceleration, (0.0, 0.0, 0.0)) for s in batch.inertial]
+    fake = ImuBatch(0, tuple(still), (QuaternionSample(still[-1].timestamp, q),))
+    device_angles = np.rad2deg((trackers[0].ref.inv() * swung).as_euler("ZYX"))
+    assert max(abs(device_angles[0]), abs(device_angles[2])) > 20  # what the old tracker used
+    angles = np.rad2deg(trackers[0].update(fake).angles)
+    assert np.abs(angles).max() < 1.0
+
+
+def test_gyro_rotation_still_tracks_real_motion(fake_imus, clock):
+    bus, source = fake_imus
+    trackers = {0: ImuTracker("a"), 1: ImuTracker("b")}
+    assert _calibrate(source, bus, clock, trackers)
+    poses = [(0.0, 0.0, 2.0 * k) for k in range(1, 16)]       # turn 30 deg about z,
+    poses += [(0.0, 20.0 * k / 15, 30.0) for k in range(1, 16)]  # then tip 20 deg
+    for roll, pitch, yaw in poses:
+        source.set_pose(0, roll, pitch, yaw)
+        source.publish_once()
+        frame = trackers[0].update(bus.latest(0))
+    roll, pitch, yaw = np.rad2deg(frame.angles)
+    assert (roll, pitch, yaw) == pytest.approx((0.0, 20.0, 30.0), abs=1.0)
 
 
 class FakeConnection:
