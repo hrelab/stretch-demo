@@ -41,7 +41,13 @@ def _head(bus, task, args):
     return HeadController(bus, task.gripper_enabled, mobility(args))
 
 
-CONTROLLERS = {"hands_vel": _hands_vel, "hands_v2": _hands_v2, "head": _head}
+def _ee_mode2(bus, task, args):
+    from stretch_demo.controllers.ee.mode2 import EeMode2Controller
+    from stretch_demo.controllers.ee.settings import PostwristSettings
+    return EeMode2Controller(bus, task.gripper_enabled, PostwristSettings.load(args.ee_profile))
+
+
+CONTROLLERS = {"hands_vel": _hands_vel, "hands_v2": _hands_v2, "head": _head, "ee_mode2": _ee_mode2}
 
 
 def mobility(args) -> MobilitySettings:
@@ -56,7 +62,7 @@ def parse_args(argv=None) -> argparse.Namespace:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--env", required=True, choices=sorted(TASKS), help="which task")
     parser.add_argument("--controller", required=True, choices=sorted(CONTROLLERS),
-                        help="hands_vel / hands_v2: IMUs on both hands; head: head + shoulder")
+                        help="hands_vel / hands_v2 / ee_mode2: IMUs on both hands; head: head + shoulder")
     parser.add_argument("--imu", default="ximu", choices=("ximu", "fake"),
                         help="ximu: the real x-IMU3s; fake: two still synthetic IMUs, to rehearse (default: %(default)s)")
     sensors = parser.add_mutually_exclusive_group()
@@ -71,6 +77,9 @@ def parse_args(argv=None) -> argparse.Namespace:
     head = parser.add_argument_group("--controller head")
     head.add_argument("--mobility", metavar="PATH", help="per-user ranges JSON, e.g. profiles/p00.json")
     head.add_argument("--shoulder", choices=("left", "right"), help="shoulder the IMU is on (default: right)")
+    ee = parser.add_argument_group("--controller ee_mode2")
+    ee.add_argument("--ee-profile", metavar="PATH",
+                    help="mujoco-sim end-effector profile JSON, e.g. profiles/imu_ee_mode2_faster.json")
     return parser.parse_args(argv)
 
 

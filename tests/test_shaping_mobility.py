@@ -39,7 +39,8 @@ def test_setpoints_clamp_to_limits_and_ema_smooths():
     assert ema("x", 1.0) == 1.0 and ema("x", 0.0) == 0.5
 
 
-@pytest.mark.parametrize("profile", sorted(PROFILES.glob("*.json")), ids=lambda p: p.name)
+# Head-controller profiles only: profiles/imu_ee_* belong to ee_mode2.
+@pytest.mark.parametrize("profile", sorted(PROFILES.glob("p[0-9]*.json")), ids=lambda p: p.name)
 def test_mujoco_sim_profiles_load_unchanged(profile):
     settings = MobilitySettings.load(profile)
     assert settings.head_yaw.pos_deg > 0

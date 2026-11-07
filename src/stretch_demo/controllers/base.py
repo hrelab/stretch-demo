@@ -98,9 +98,11 @@ class ImuController:
             return self._calibrate(batches, now)
         frames = self._frames(batches)
         if frames is None:
+            self.on_hold()
             return self.compose(0.0)
         self._message = ""
-        ctrl = self.compose(self.control(frames, self.dt, now))
+        drive = self.control(frames, self.dt, now)
+        ctrl = self.compose(*(drive if isinstance(drive, tuple) else (drive,)))
         self.limits = limits_text(self.watch.check(self.setpoints, data, now))
         return ctrl
 
@@ -112,15 +114,23 @@ class ImuController:
     def on_setup(self) -> None:
         """Reset per-visitor state (filters, gesture detectors)."""
 
-    def control(self, frames: dict, dt: float, now: float) -> float:
+    def control(self, frames: dict, dt: float, now: float) -> float | tuple[float, float]:
         """Update self.setpoints / self.gripper; return the base strafe level in
-        [-1, 1] (+ = to the robot's left)."""
+        [-1, 1] (+ = to the robot's left), or (strafe, forward) for a controller
+        that also drives the base forward/back (ee_mode2)."""
         raise NotImplementedError
+
+    def on_hold(self) -> None:
+        """An IMU went silent: the robot holds (base slews to a stop)."""
+
+    def on_key(self, keycode: int) -> None:
+        """A key pressed in the viewer window (GLFW keycode). Called from the
+        viewer's thread: hand it over to control(), don't act on it here."""
 
     def describe(self) -> str:
         return ""
 
-    def compose(self, base_level: float) -> np.ndarray:
+    def compose(self, base_level: float, forward: float = 0.0) -> np.ndarray:
         ctrl = self._template.copy()
         for joint in JOINTS:
             ctrl[self.act[joint]] = self.setpoints[joint]
@@ -128,7 +138,7 @@ class ImuController:
         ctrl = np.clip(ctrl, self.lo, self.hi)
         # Base AFTER the clip: the wheels report ctrlrange [0, 0]. Strafing is what
         # moves the forward-reaching arm sideways along a task.
-        self.base.drive(ctrl, 0.0, strafe=base_level, dt=self.dt)
+        self.base.drive(ctrl, forward, strafe=base_level, dt=self.dt)
         return ctrl
 
     # --- internals ---

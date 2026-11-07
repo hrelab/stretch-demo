@@ -15,11 +15,12 @@ HELP = """Commands (type the letter, then Enter):
   c  recalibrate neutral (visitor holds still ~2 s)
   r  reset the task / play another round
   n  next visitor: robot and task reset, scores cleared, recalibrate
+  g  open / close the gripper (operator override; ee_mode2: also space or the clicker)
   q  quit (or close the viewer window)
   h  this help
 After a feeding round, the next line typed is the visitor's initials."""
 
-COMMANDS = {"c", "r", "n", "q", "h"}
+COMMANDS = {"c", "r", "n", "g", "q", "h"}
 
 
 def command_of(line: str) -> str | None:

@@ -40,5 +40,12 @@ or below:
 | `sim/harness.place_joints_at` | 12 | `sim/harness.py`: tendon case in `_place_tendon` |
 | `joint_config.ImuTracker.update` | 11 | `tracking/imu_tracker.py`: velocity integration dropped; gyro peak in `_update_gyro` |
 
+| `end_effector/imu_ee_postwrist.ImuEePostwristController.get_ctrl` | 29 | `controllers/ee/mode2.py`: BASE mode and the lockout aren't used by Mode 2; IMU reading/holding is the shared `controllers/base.py`; the rest is `control` / `_task_twist` / `_follow` |
+| `end_effector/imu_ee_prewrist_controller.ImuEePrewristController._read_rotations` | 26 | replaced by the demo's `ImuBus` + `ImuTracker` (no Redis payload parsing) |
+| `end_effector/imu_ee_prewrist_controller.ImuEePrewristController.get_ctrl` | 22 | not needed: Mode 2 only builds on the post-wrist controller's arm path |
+| `end_effector/imu_ee_prewrist_controller.EeSettings.__post_init__` | 20 | `controllers/ee/settings.py`: one validator per rule (`_triple`, `_check_tilts`, `_check_signs`, `_check_speeds`, `_check_reach`) |
+| `end_effector/startup_pose.scene_camera_target` | 15 | not ported: each task's own start pose and camera are used |
+| `end_effector/imu_ee_mode2_controller.ImuEeMode2Controller._task_twist` | 13 | `controllers/ee/mode2.py`: `PitchStage.step` + `phase_label` + `level_camera_axes` |
+
 These weren't ported (out of scope for the demo): `viz/feedback_layout.validate_layout` (46),
 `viz/feedback_gui.FeedbackCanvas.paintEvent` (30), and the `rom_calibration` functions.

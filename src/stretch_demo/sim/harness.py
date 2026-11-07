@@ -95,7 +95,7 @@ class SimHarness:
         controller.setup(self.model, self.data, self.act)
         self.task.bind(self.model, self.data)
         self._last_ctrl = None
-        with mujoco.viewer.launch_passive(self.model, self.data,
+        with mujoco.viewer.launch_passive(self.model, self.data, key_callback=controller.on_key,
                                           show_left_ui=False, show_right_ui=False) as viewer:
             self._aim_camera(viewer)
             while viewer.is_running() and not self.quit:
@@ -138,10 +138,19 @@ class SimHarness:
             print("Task reset.")
         elif command == "n":
             self._next_visitor(controller, log)
+        elif command == "g":
+            self._toggle_gripper(controller)
         elif command == "q":
             self.quit = True
         elif line.strip():  # h, or anything unrecognized
             print(HELP)
+
+    @staticmethod
+    def _toggle_gripper(controller) -> None:
+        if controller.gripper.enabled:
+            controller.gripper.toggle()  # prints the new state
+        else:
+            print("The gripper holds the spoon in this task.")
 
     def _next_visitor(self, controller, log) -> None:
         self.reset_all()
