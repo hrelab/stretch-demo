@@ -39,7 +39,8 @@ IMU 0 = first serial (`6A3409FC`), IMU 1 = second (`6A32706F`).
 
 | controller | IMU 0 | IMU 1 |
 | --- | --- | --- |
-| `hands_vel`, `hands_v2`, `ee_mode2` | back of left hand | back of right hand |
+| `hands_vel`, `hands_v2` | back of left hand | back of right hand |
+| `ee_mode2` | back of left hand **or** the head | back of right hand |
 | `head` | head | top of the shoulder (right by default) |
 
 The IMUs are found by serial number on whatever network the laptop is on. If
@@ -61,8 +62,8 @@ None of them have modes: the same motion always does the same thing.
 - Quick right-hand flick → gripper.
 
 **`ee_mode2`** – the hands move the gripper itself; the robot works out the joints.
-- Left hand tilt → up/down (the wrist tips 10° first).
-- Left hand twist → turn the gripper.
+- Left hand tilt (or nod, with IMU 0 on the head) → up/down (the wrist tips 10° first).
+- Left hand twist (or tilt head toward a shoulder) → turn the gripper.
 - Right hand tilt → forward/back. Right hand twist → sideways.
 - Space or a presenter clicker → gripper (the viewer window must be focused).
 
@@ -95,7 +96,8 @@ move it back the other way.
 3. Power on the IMUs, run the demo, and check each IMU shows ~400 Hz.
 4. Have the visitor sit relaxed and still while it calibrates.
 
-**Not yet tried with real IMUs:** `ee_mode2`, the `head` tilt-to-slide
+**Not yet tried with real IMUs:** `ee_mode2` (only its left-hand up/down is
+confirmed; with IMU 0 on the head, check that nodding down moves the gripper down), the `head` tilt-to-slide
 direction (flip `base_roll_sign` in a `--mobility` file if backwards), and the
 hands controllers' wrist-pitch direction.
 

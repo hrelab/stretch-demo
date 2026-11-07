@@ -50,7 +50,7 @@ class Visitor:
             if np.all(np.abs(error) < tol):
                 break
             tilt = [_tilt(e, tol) for e in error]
-            self.hold({0: frame(pitch=tilt[2]), 1: frame(pitch=tilt[0], roll=-tilt[1])}, 0.05)
+            self.hold({0: frame(pitch=-tilt[2]), 1: frame(pitch=tilt[0], roll=-tilt[1])}, 0.05)
         self.hold(NEUTRAL, 0.4)
 
     def press(self, keycode: int) -> None:
@@ -156,8 +156,8 @@ def test_feeding_keeps_the_spoon_whatever_is_pressed():
 @pytest.mark.parametrize("hands, moved", [
     ({0: frame(), 1: frame(pitch=35)}, ("x", +0.06)),    # right pitch: forward
     ({0: frame(), 1: frame(roll=35)}, ("y", -0.06)),     # right roll: to the right
-    ({0: frame(pitch=35), 1: frame()}, ("z", +0.04)),    # left pitch: up (after the wrist pitches)
-    ({0: frame(pitch=-35), 1: frame()}, ("z", -0.04)),   # ... and down
+    ({0: frame(pitch=-35), 1: frame()}, ("z", +0.04)),   # left fingers up (- IMU pitch): up, after the wrist pitches
+    ({0: frame(pitch=35), 1: frame()}, ("z", -0.04)),    # ... and down (LEFT_PITCH_SIGN, from hardware)
 ])
 def test_hand_tilts_move_the_grasp_center(hands, moved):
     v = Visitor("pickup")
@@ -179,9 +179,9 @@ def test_left_roll_turns_the_gripper_about_its_grasp_center():
 
 def test_up_pitches_the_wrist_first_and_neutral_levels_it():
     v = Visitor("pickup")
-    v.hold({0: frame(pitch=35), 1: frame()}, 0.1)
+    v.hold({0: frame(pitch=-35), 1: frame()}, 0.1)
     assert v.c.stage.phase == "PITCH UP" and not v.c.stage.vertical
-    v.hold({0: frame(pitch=35), 1: frame()}, 0.6)
+    v.hold({0: frame(pitch=-35), 1: frame()}, 0.6)
     assert v.c.stage.phase == "LIFT UP"
     assert np.rad2deg(v.c.setpoints["wrist_pitch"]) == pytest.approx(-10.0, abs=0.1)
     v.hold(NEUTRAL, 1.5)
@@ -192,10 +192,10 @@ def test_up_still_works_from_the_bottom_of_the_lift():
     """In the source, the pitch stage never finished at the lift's lower limit
     (the IK would need the lift lower still), so up never started."""
     v = Visitor("pickup")
-    v.hold({0: frame(pitch=-35), 1: frame()}, 9.0)
+    v.hold({0: frame(pitch=35), 1: frame()}, 9.0)
     assert v.c.setpoints["lift"] == pytest.approx(0.0, abs=1e-3)
     bottom = v.grasp()[2]
-    v.hold({0: frame(pitch=35), 1: frame()}, STAGE_TIMEOUT_S + 2.0)
+    v.hold({0: frame(pitch=-35), 1: frame()}, STAGE_TIMEOUT_S + 2.0)
     assert v.grasp()[2] > bottom + 0.04
 
 

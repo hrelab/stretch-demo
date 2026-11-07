@@ -1,6 +1,7 @@
 """ee_mode2: mujoco-sim's end-effector Mode 2 controller (end_effector/
 imu_ee_mode2_controller.py, ee_controller commit 85f57de by jawy1248), on the
-demo's IMU pipeline. IMUs on the backs of both hands (imu 0 = left, imu 1 = right).
+demo's IMU pipeline. imu 0 on the back of the left hand OR on the head (same
+axes: nod = pitch, ear to shoulder = roll); imu 1 on the back of the right hand.
 Every motion moves the GRASP CENTER (inverse kinematics picks the joints and
 base); nothing is a single joint.
 
@@ -39,6 +40,8 @@ Changes from the source, for the demo:
   IK keeps the grasp center still, which would need the lift lower still), so
   "up" never started after reaching the floor: stuck in PITCH UP (found
   2026-11-06 driving the pickup task; the same holds going down from the top).
+- Left pitch sign flipped (LEFT_PITCH_SIGN): on the lab's IMUs, tipping the
+  left hand's fingers up moved the gripper DOWN (hardware, 2026-11-06).
 - Complexity: _task_twist (13) is split into PitchStage + level_camera_axes.
 """
 import time
@@ -53,6 +56,10 @@ from stretch_demo.sim.base_drive import OMNI_FULL_SPEED
 from stretch_demo.tracking.shaping import RollUnwrap
 
 LEFT, RIGHT = 0, 1
+# Hardware 2026-11-06: with the source's sign, fingers-up on the left hand moved
+# the gripper down. Applied before the profile's translation_signs, so mujoco-sim
+# profiles keep their meaning on top of it.
+LEFT_PITCH_SIGN = -1.0
 
 PITCH_BEFORE_LIFT_DEG = 10.0
 PITCH_STAGE_SPEED_DEG_S = 30.0
@@ -120,7 +127,7 @@ def mode2_rates(cfg: PostwristSettings, left, right):
     + rotation about camera Y turns the view toward camera-right.
     """
     motion = cfg.motion
-    left = motion.rate_input(left)
+    left = motion.rate_input(np.asarray(left) * [1.0, LEFT_PITCH_SIGN])
     right = cfg.rotation_input(right)
     linear = np.array([right[0], -left[1], right[1]]) * np.asarray(motion.max_speed_m_s)
     turn = -left[0] * np.deg2rad(cfg.max_rotation_deg_s[1]) * motion.orientation_scale[1]
@@ -180,7 +187,7 @@ class PitchStage:
 
 class EeMode2Controller(ImuController):
     name = "ee_mode2"
-    imu_labels = ("left hand", "right hand")
+    imu_labels = ("left hand/head", "right hand")
 
     def __init__(self, bus, gripper_enabled: bool = True, settings: PostwristSettings | None = None):
         super().__init__(bus, gripper_enabled)
